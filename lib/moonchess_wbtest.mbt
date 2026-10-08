@@ -249,3 +249,57 @@ test "opening book returns nothing off-book" {
 test "opening book is not empty" {
   assert_true(book_size() > 0)
 }
+
+///|
+test "perft suite: position 3" {
+  let game = Chess::from_fen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1").unwrap()
+  assert_eq(game.perft(1), 14)
+  assert_eq(game.perft(2), 191)
+  assert_eq(game.perft(3), 2812)
+  assert_eq(game.perft(4), 43238)
+}
+
+///|
+test "perft suite: position 4" {
+  let game = Chess::from_fen(
+    "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+  ).unwrap()
+  assert_eq(game.perft(1), 6)
+  assert_eq(game.perft(2), 264)
+  assert_eq(game.perft(3), 9467)
+}
+
+///|
+test "perft suite: position 5" {
+  let game = Chess::from_fen(
+    "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+  ).unwrap()
+  assert_eq(game.perft(1), 44)
+  assert_eq(game.perft(2), 1486)
+  assert_eq(game.perft(3), 62379)
+}
+
+///|
+test "perft suite: position 6" {
+  let game = Chess::from_fen(
+    "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+  ).unwrap()
+  assert_eq(game.perft(1), 46)
+  assert_eq(game.perft(2), 2079)
+  assert_eq(game.perft(3), 89890)
+}
+
+///|
+test "stalemate is a draw but not check" {
+  let game = Chess::from_fen("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1").unwrap()
+  assert_false(game.is_check())
+  assert_true(game.is_stalemate())
+  assert_true(game.is_draw())
+  assert_true(game.is_game_over())
+}
+
+///|
+test "king and bishop vs king is insufficient" {
+  let game = Chess::from_fen("8/8/8/4k3/8/8/8/4KB2 w - - 0 1").unwrap()
+  assert_true(game.is_insufficient_material())
+}
