@@ -1,0 +1,5 @@
+import {
+  "poipoiiii/moonchess/lib",
+}
+
+pkgtype(kind: "executable")
