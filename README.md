@@ -16,7 +16,7 @@
   `is_threefold_repetition`、`is_insufficient_material`、`is_game_over`。
 - **撤回走子**：完整撤销栈，支持 `undo`。
 - **AI 引擎**：子力价值 + 棋子位置表评估，negamax + α-β 剪枝，静止搜索（quiescence），
-  MVV-LVA 走法排序。
+  置换表 / 杀手着法 / 历史启发 + MVV-LVA 走法排序。
 - **置换表搜索**：64 位 Zobrist 哈希 + 2^16 项置换表，迭代加深（`Searcher`），支持时间限制。
 - **开局库**：内置常见开局线路，按 SAN 历史匹配。
 - **棋盘渲染**：`display()` 输出 Unicode / ASCII 棋盘。

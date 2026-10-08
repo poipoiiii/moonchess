@@ -165,6 +165,8 @@ pub struct SearchResult {
 
 pub struct Searcher {
   tt : Array[TTEntry]
+  killers : Array[Int]
+  history : Array[Int]
   mut nodes : Int
 }
 pub fn Searcher::new() -> Self

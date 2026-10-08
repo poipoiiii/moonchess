@@ -100,9 +100,19 @@ struct TTEntry {
 }
 
 ///|
-/// A search engine with a transposition table.
+/// Maximum number of plies tracked by killer-move slots.
+let max_ply : Int = 64
+
+///|
+/// Size of the history table (`128 * 128` move codes).
+let history_size : Int = 16384
+
+///|
+/// A search engine with a transposition table, killer moves and history.
 pub struct Searcher {
   tt : Array[TTEntry]
+  killers : Array[Int]
+  history : Array[Int]
   mut nodes : Int
 }
 
@@ -125,21 +135,70 @@ pub fn Searcher::new() -> Searcher {
     flag: flag_exact,
     best_from: -1,
   }
-  { tt: Array::make(tt_size, empty), nodes: 0, }
+  {
+    tt: Array::make(tt_size, empty),
+    killers: Array::make(max_ply * 2, -1),
+    history: Array::make(history_size, 0),
+    nodes: 0,
+  }
 }
 
 ///|
-/// Order moves, prioritising the transposition-table move and captures.
-fn order_moves_tt(moves : Array[Move], tt_from : Int) -> Array[Move] {
+/// Ordering score for a move: material/TT/killer/history combined.
+fn Searcher::score_move(
+  self : Searcher,
+  m : Move,
+  tt_from : Int,
+  ply : Int,
+) -> Int {
+  let mut score = move_score(m)
+  if m.from == tt_from {
+    score = score + 100000
+  }
+  let code = m.from * 128 + m.to
+  if ply < max_ply {
+    if self.killers[ply * 2] == code || self.killers[ply * 2 + 1] == code {
+      score = score + 90000
+    }
+  }
+  score + self.history[code]
+}
+
+///|
+/// Record a quiet move that caused a beta cutoff as a killer and in the history.
+fn Searcher::record_cutoff(
+  self : Searcher,
+  m : Move,
+  ply : Int,
+  depth : Int,
+) -> Unit {
+  if m.captured is Some(_) || ply >= max_ply {
+    return
+  }
+  let code = m.from * 128 + m.to
+  if self.killers[ply * 2] != code {
+    self.killers[ply * 2 + 1] = self.killers[ply * 2]
+    self.killers[ply * 2] = code
+  }
+  self.history[code] = self.history[code] + depth * depth
+}
+
+///|
+/// Order moves, prioritising the TT move, killers, captures and history.
+fn Searcher::order_moves(
+  self : Searcher,
+  moves : Array[Move],
+  tt_from : Int,
+  ply : Int,
+) -> Array[Move] {
   let result = moves.copy()
   let n = result.length()
   let mut i = 1
   while i < n {
     let key = result[i]
-    let key_score = move_score(key) +
-      (if key.from == tt_from { 100000 } else { 0 })
+    let key_score = self.score_move(key, tt_from, ply)
     let mut j = i - 1
-    while j >= 0 && move_score(result[j]) < key_score {
+    while j >= 0 && self.score_move(result[j], tt_from, ply) < key_score {
       result[j + 1] = result[j]
       j = j - 1
     }
@@ -220,7 +279,7 @@ fn Searcher::negamax(
   let original_alpha = alpha
   let mut best = -infinity
   let mut best_from = -1
-  for m in order_moves_tt(moves, tt_from) {
+  for m in self.order_moves(moves, tt_from, ply) {
     game.make_move(m)
     let score = -self.negamax(game, depth - 1, -beta, -alpha, ply + 1)
     ignore(game.undo_move())
@@ -232,6 +291,7 @@ fn Searcher::negamax(
       alpha = score
     }
     if alpha >= beta {
+      self.record_cutoff(m, ply, depth)
       break
     }
   }
@@ -287,7 +347,7 @@ fn Searcher::iterative(
     let mut local_score = -infinity
     let mut alpha = -infinity
     let mut aborted = false
-    for m in order_moves_tt(root_moves, tt_from) {
+    for m in self.order_moves(root_moves, tt_from, 0) {
       if timer_expired(deadline) {
         aborted = true
         break
