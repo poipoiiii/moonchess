@@ -169,6 +169,7 @@ pub struct Searcher {
 }
 pub fn Searcher::new() -> Self
 pub fn Searcher::search(Self, Chess, Int) -> SearchResult
+pub fn Searcher::search_timed(Self, Chess, Int, Int) -> SearchResult
 
 type TTEntry
 

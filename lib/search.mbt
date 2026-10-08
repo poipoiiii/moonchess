@@ -247,11 +247,27 @@ fn Searcher::negamax(
 }
 
 ///|
-/// Iterative-deepening root search up to `max_depth`.
-pub fn Searcher::search(
+/// Current time in milliseconds.
+fn now_ms() -> Int {
+  @env.now().to_int()
+}
+
+///|
+/// Whether the optional deadline has passed.
+fn timer_expired(deadline : Int?) -> Bool {
+  match deadline {
+    Some(d) => now_ms() >= d
+    None => false
+  }
+}
+
+///|
+/// Shared iterative-deepening driver with an optional deadline.
+fn Searcher::iterative(
   self : Searcher,
   game : Chess,
   max_depth : Int,
+  deadline : Int?,
 ) -> SearchResult {
   let root_moves = game.moves()
   if root_moves.length() == 0 {
@@ -260,8 +276,9 @@ pub fn Searcher::search(
   let mut best : Move? = None
   let mut best_score = 0
   let mut reached = 0
+  let mut stop = false
   let mut depth = 1
-  while depth <= max_depth {
+  while depth <= max_depth && !stop {
     let tt_from = match best {
       Some(m) => m.from
       None => -1
@@ -269,7 +286,12 @@ pub fn Searcher::search(
     let mut local_best = root_moves[0]
     let mut local_score = -infinity
     let mut alpha = -infinity
+    let mut aborted = false
     for m in order_moves_tt(root_moves, tt_from) {
+      if timer_expired(deadline) {
+        aborted = true
+        break
+      }
       game.make_move(m)
       let score = -self.negamax(game, depth - 1, -infinity, -alpha, 1)
       ignore(game.undo_move())
@@ -281,13 +303,38 @@ pub fn Searcher::search(
         }
       }
     }
-    best = Some(local_best)
-    best_score = local_score
-    reached = depth
-    if best_score > mate_score - 1000 || best_score < -(mate_score - 1000) {
-      break
+    if aborted {
+      stop = true
+    } else {
+      best = Some(local_best)
+      best_score = local_score
+      reached = depth
+      if best_score > mate_score - 1000 || best_score < -(mate_score - 1000) {
+        stop = true
+      }
     }
     depth = depth + 1
   }
   { best, score: best_score, depth: reached, nodes: self.nodes, }
+}
+
+///|
+/// Iterative-deepening root search up to `max_depth`.
+pub fn Searcher::search(
+  self : Searcher,
+  game : Chess,
+  max_depth : Int,
+) -> SearchResult {
+  self.iterative(game, max_depth, None)
+}
+
+///|
+/// Iterative-deepening search bounded by a time budget in milliseconds.
+pub fn Searcher::search_timed(
+  self : Searcher,
+  game : Chess,
+  max_depth : Int,
+  time_ms : Int,
+) -> SearchResult {
+  self.iterative(game, max_depth, Some(now_ms() + time_ms))
 }

@@ -312,3 +312,17 @@ test "board display renders pieces and coordinates" {
   assert_true(text.contains("R N B Q K B N R"))
   assert_true(text.contains("r n b q k b n r"))
 }
+
+///|
+test "timed search finds a mate in one" {
+  let game = Chess::from_fen("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1").unwrap()
+  let searcher = Searcher::new()
+  let result = searcher.search_timed(game, 8, 5000)
+  match result.best {
+    Some(m) => {
+      game.make_move(m)
+      assert_true(game.is_checkmate())
+    }
+    None => assert_true(false)
+  }
+}

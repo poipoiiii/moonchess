@@ -85,6 +85,7 @@ fn usage() -> Unit {
   println(
     "  moonchess think <depth> [fen]       iterative-deepening search with a TT",
   )
+  println("  moonchess timed <ms> [fen]          time-limited search")
   println("  moonchess selfplay <depth> [plies]  print a self-play game in SAN")
   println(
     "  moonchess book <san...>             play moves, then print a book reply",
@@ -121,6 +122,23 @@ fn main {
       let game = game_from(args, 3)
       let searcher = @lib.Searcher::new()
       let result = searcher.search(game, depth)
+      match result.best {
+        Some(m) =>
+          println(
+            "best: \{m.san} (score \{result.score} cp, depth \{result.depth}, nodes \{result.nodes})",
+          )
+        None => println("no legal move (game over)")
+      }
+    }
+    "timed" => {
+      let budget = if args.length() > 2 {
+        parse_int_arg(args[2], 1000)
+      } else {
+        1000
+      }
+      let game = game_from(args, 3)
+      let searcher = @lib.Searcher::new()
+      let result = searcher.search_timed(game, 64, budget)
       match result.best {
         Some(m) =>
           println(

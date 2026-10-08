@@ -17,7 +17,7 @@
 - **撤回走子**：完整撤销栈，支持 `undo`。
 - **AI 引擎**：子力价值 + 棋子位置表评估，negamax + α-β 剪枝，静止搜索（quiescence），
   MVV-LVA 走法排序。
-- **置换表搜索**：64 位 Zobrist 哈希 + 2^16 项置换表，迭代加深（`Searcher`）。
+- **置换表搜索**：64 位 Zobrist 哈希 + 2^16 项置换表，迭代加深（`Searcher`），支持时间限制。
 - **开局库**：内置常见开局线路，按 SAN 历史匹配。
 - **棋盘渲染**：`display()` 输出 Unicode / ASCII 棋盘。
 - **perft 自检**：内置 perft，对照公开标准用例验证走法生成。
@@ -87,6 +87,7 @@ moon run cmd/main -- board            # 打印棋盘
 moon run cmd/main -- perft 4          # perft(4) = 197281
 moon run cmd/main -- best 4           # 搜索 4 层
 moon run cmd/main -- think 6          # 迭代加深 + 置换表
+moon run cmd/main -- timed 1500       # 限时 1500ms 搜索
 moon run cmd/main -- selfplay 3 20    # 自我对弈（开局用开局库）
 moon run cmd/main -- book e4 e5 Nf3   # 查询开局库续着
 moon run cmd/main -- fen              # 打印当前 FEN
