@@ -89,6 +89,7 @@ fn usage() -> Unit {
   println(
     "  moonchess book <san...>             play moves, then print a book reply",
   )
+  println("  moonchess board [fen]               print the board and FEN")
   println("  moonchess fen [fen]                 validate and echo a FEN")
 }
 
@@ -148,6 +149,11 @@ fn main {
         Some(m) => println("book: \{m.san}")
         None => println("book: (no known continuation)")
       }
+    }
+    "board" => {
+      let game = game_from(args, 2)
+      println(game.display())
+      println(game.fen())
     }
     "fen" => {
       let game = game_from(args, 2)

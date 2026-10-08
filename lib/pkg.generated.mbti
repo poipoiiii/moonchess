@@ -81,6 +81,7 @@ pub fn Chess::best_move_scored(Self, Int) -> (Move?, Int)
 pub fn Chess::board(Self) -> Array[Array[Piece?]]
 pub fn Chess::book_move(Self) -> Move?
 pub fn Chess::clear(Self) -> Unit
+pub fn Chess::display(Self, unicode? : Bool) -> String
 pub fn Chess::evaluate(Self) -> Int
 pub fn Chess::fen(Self) -> String
 pub fn Chess::from_fen(String) -> Self?

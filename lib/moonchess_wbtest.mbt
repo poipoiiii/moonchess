@@ -303,3 +303,12 @@ test "king and bishop vs king is insufficient" {
   let game = Chess::from_fen("8/8/8/4k3/8/8/8/4KB2 w - - 0 1").unwrap()
   assert_true(game.is_insufficient_material())
 }
+
+///|
+test "board display renders pieces and coordinates" {
+  let game = Chess::new()
+  let text = game.display(unicode=false)
+  assert_true(text.contains("a b c d e f g h"))
+  assert_true(text.contains("R N B Q K B N R"))
+  assert_true(text.contains("r n b q k b n r"))
+}
