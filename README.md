@@ -41,6 +41,7 @@ moonchess/
 │   └── moonchess_wbtest.mbt  # 测试（含 perft 套件）
 ├── cmd/main/                 # 命令行前端
 ├── examples/demo/            # 可运行示例
+├── docs/design.md            # 设计说明
 └── .github/workflows/        # CI（check / test / fmt / info）
 ```
 
@@ -114,6 +115,10 @@ moon run examples/demo
 
 `moon test` 覆盖 FEN、perft、SAN、PGN、王车易位、吃过路兵、升变、撤回、将杀 / 逼和 / 和棋判定、
 Zobrist 哈希、引擎与开局库等核心路径。
+
+## 设计说明
+
+数据结构、合法性判定、搜索与置换表的设计取舍见 [docs/design.md](./docs/design.md)。
 
 ## 第三方来源与许可
 
