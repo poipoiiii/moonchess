@@ -94,9 +94,21 @@ fn pst(kind : PieceType, color : Color, sq : Square) -> Int {
 }
 
 ///|
+/// Bonus for having the bishop pair, in centipawns.
+let bishop_pair_bonus : Int = 30
+
+///|
+/// Penalty per extra pawn on the same file, in centipawns.
+let doubled_pawn_penalty : Int = 15
+
+///|
 /// Static evaluation in centipawns, from White's point of view.
 pub fn Chess::evaluate(self : Chess) -> Int {
   let mut score = 0
+  let white_pawn_files : Array[Int] = Array::make(8, 0)
+  let black_pawn_files : Array[Int] = Array::make(8, 0)
+  let mut white_bishops = 0
+  let mut black_bishops = 0
   let mut sq = 0
   while sq < 128 {
     if on_board(sq) {
@@ -108,11 +120,42 @@ pub fn Chess::evaluate(self : Chess) -> Int {
           } else {
             score = score - v
           }
+          if p.kind == Bishop {
+            if p.color == White {
+              white_bishops = white_bishops + 1
+            } else {
+              black_bishops = black_bishops + 1
+            }
+          }
+          if p.kind == Pawn {
+            let file = file_of(sq)
+            if p.color == White {
+              white_pawn_files[file] = white_pawn_files[file] + 1
+            } else {
+              black_pawn_files[file] = black_pawn_files[file] + 1
+            }
+          }
         }
         None => ()
       }
     }
     sq = sq + 1
+  }
+  if white_bishops >= 2 {
+    score = score + bishop_pair_bonus
+  }
+  if black_bishops >= 2 {
+    score = score - bishop_pair_bonus
+  }
+  let mut file = 0
+  while file < 8 {
+    if white_pawn_files[file] > 1 {
+      score = score - doubled_pawn_penalty * (white_pawn_files[file] - 1)
+    }
+    if black_pawn_files[file] > 1 {
+      score = score + doubled_pawn_penalty * (black_pawn_files[file] - 1)
+    }
+    file = file + 1
   }
   score
 }

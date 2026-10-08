@@ -377,3 +377,17 @@ test "perft divide sums to perft" {
   }
   assert_eq(total, game.perft(3))
 }
+
+///|
+test "doubled pawns are penalised" {
+  let doubled = Chess::from_fen("4k3/8/8/8/4P3/8/4P3/4K3 w - - 0 1").unwrap()
+  let spread = Chess::from_fen("4k3/8/8/8/3P4/8/4P3/4K3 w - - 0 1").unwrap()
+  assert_true(doubled.evaluate() < spread.evaluate())
+}
+
+///|
+test "bishop pair is rewarded" {
+  let pair = Chess::from_fen("4k3/8/8/8/8/8/8/2BBK3 w - - 0 1").unwrap()
+  let mixed = Chess::from_fen("4k3/8/8/8/8/8/8/2BNK3 w - - 0 1").unwrap()
+  assert_true(pair.evaluate() > mixed.evaluate())
+}
