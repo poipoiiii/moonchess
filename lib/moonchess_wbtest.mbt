@@ -391,3 +391,27 @@ test "bishop pair is rewarded" {
   let mixed = Chess::from_fen("4k3/8/8/8/8/8/8/2BNK3 w - - 0 1").unwrap()
   assert_true(pair.evaluate() > mixed.evaluate())
 }
+
+///|
+test "every opening line is playable" {
+  for line in opening_lines {
+    let game = Chess::new()
+    for san in line {
+      match game.move_by_san(san) {
+        Some(_) => ()
+        None => assert_true(false)
+      }
+    }
+  }
+}
+
+///|
+test "opening book knows the sicilian" {
+  let game = Chess::new()
+  ignore(game.move_by_san("e4"))
+  ignore(game.move_by_san("c5"))
+  match game.book_move() {
+    Some(m) => assert_eq(m.san, "Nf3")
+    None => assert_true(false)
+  }
+}

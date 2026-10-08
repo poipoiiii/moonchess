@@ -16,7 +16,7 @@
 - 杀手着法与历史启发走法排序。
 - Zobrist 哈希、置换表与迭代加深（`Searcher`）。
 - 时间受限的迭代加深（`search_timed`）。
-- 开局库（常见开局线路）。
+- 开局库（常见开局线路，测试校验每条线路均可合法走完）。
 - PGN 导入导出（容忍注释、变例、NAG 与内联回合号）。
 - 棋盘渲染：Unicode / ASCII（`display`）。
 - 命令行：`board` / `perft` / `divide` / `best` / `think` / `timed` / `selfplay` / `book` /
