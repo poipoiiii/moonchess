@@ -79,6 +79,7 @@ fn usage() -> Unit {
   println(
     "  moonchess perft <depth>             perft node count from the start",
   )
+  println("  moonchess divide <depth>            perft split by root move")
   println(
     "  moonchess best <depth> [fen]        best move for the side to move",
   )
@@ -107,6 +108,16 @@ fn main {
       let depth = if args.length() > 2 { parse_int_arg(args[2], 3) } else { 3 }
       let game = @lib.Chess::new()
       println("perft(\{depth}) = \{game.perft(depth)}")
+    }
+    "divide" => {
+      let depth = if args.length() > 2 { parse_int_arg(args[2], 3) } else { 3 }
+      let rows = @lib.Chess::new().perft_divide(depth)
+      let mut total = 0
+      for row in rows {
+        println("\{row.0}: \{row.1}")
+        total = total + row.1
+      }
+      println("total: \{total}")
     }
     "best" => {
       let depth = if args.length() > 2 { parse_int_arg(args[2], 3) } else { 3 }

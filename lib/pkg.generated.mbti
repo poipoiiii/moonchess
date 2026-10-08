@@ -109,6 +109,7 @@ pub fn Chess::move_count(Self) -> Int
 pub fn Chess::moves(Self) -> Array[Move]
 pub fn Chess::new() -> Self
 pub fn Chess::perft(Self, Int) -> Int
+pub fn Chess::perft_divide(Self, Int) -> Array[(String, Int)]
 pub fn Chess::pgn(Self, max_width? : Int) -> String
 pub fn Chess::piece_on(Self, Int) -> Piece?
 pub fn Chess::play(Self, String, String, PieceType?) -> Move?

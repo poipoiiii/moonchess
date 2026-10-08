@@ -365,3 +365,15 @@ test "validate_fen rejects malformed positions" {
   assert_true(validate_fen("4k3/8/8/8/8/8/8/P3K3 w - - 0 1") is Some(_))
   assert_true(validate_fen("4k3/8/8/8/8/8/8/4RK2 w - - 0 1") is Some(_))
 }
+
+///|
+test "perft divide sums to perft" {
+  let game = Chess::new()
+  let rows = game.perft_divide(3)
+  assert_eq(rows.length(), 20)
+  let mut total = 0
+  for row in rows {
+    total = total + row.1
+  }
+  assert_eq(total, game.perft(3))
+}

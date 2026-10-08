@@ -86,6 +86,7 @@ println("depth=\{result.depth} score=\{result.score} nodes=\{result.nodes}")
 ```bash
 moon run cmd/main -- board            # 打印棋盘
 moon run cmd/main -- perft 4          # perft(4) = 197281
+moon run cmd/main -- divide 3         # perft 按首着拆分
 moon run cmd/main -- best 4           # 搜索 4 层
 moon run cmd/main -- think 6          # 迭代加深 + 置换表
 moon run cmd/main -- timed 1500       # 限时 1500ms 搜索

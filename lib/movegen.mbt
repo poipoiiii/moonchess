@@ -420,6 +420,20 @@ pub fn Chess::perft(self : Chess, depth : Int) -> Int {
 }
 
 ///|
+/// Perft split by each legal root move, returned as `(SAN, node count)`.
+pub fn Chess::perft_divide(self : Chess, depth : Int) -> Array[(String, Int)] {
+  let moves = self.moves()
+  let out : Array[(String, Int)] = []
+  for m in moves {
+    self.make_move(m)
+    let nodes = if depth <= 1 { 1 } else { self.perft(depth - 1) }
+    ignore(self.undo_move())
+    out.push((m.san, nodes))
+  }
+  out
+}
+
+///|
 /// Whether the side to move has any legal move.
 pub fn Chess::has_legal_move(self : Chess) -> Bool {
   self.legal_moves_raw().length() > 0

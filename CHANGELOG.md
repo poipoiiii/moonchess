@@ -19,7 +19,8 @@
 - 开局库（常见开局线路）。
 - PGN 导入导出（容忍注释、变例、NAG 与内联回合号）。
 - 棋盘渲染：Unicode / ASCII（`display`）。
-- 命令行：`board` / `perft` / `best` / `think` / `selfplay` / `book` / `fen`。
+- 命令行：`board` / `perft` / `divide` / `best` / `think` / `timed` / `selfplay` / `book` /
+  `validate` / `fen`。
 - 可运行示例：`examples/demo`。
 - 覆盖标准 perft 用例（初始局面、Kiwipete、Position 3–6）的测试套件。
 - GitHub Actions CI（`moon check` / `moon test` / `moon fmt` / `moon info`）。
