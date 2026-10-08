@@ -1,0 +1,154 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "poipoiiii/moonchess/lib"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub let bishop_offsets : Array[Int]
+
+pub let castle_black_king : Int
+
+pub let castle_black_queen : Int
+
+pub let castle_white_king : Int
+
+pub let castle_white_queen : Int
+
+pub fn clone_board(Array[Piece?]) -> Array[Piece?]
+
+pub fn empty_board() -> Array[Piece?]
+
+pub fn file_letter(Int) -> String
+
+pub fn file_of(Int) -> Int
+
+pub fn has_pawn(Array[Piece?], Int, Color) -> Bool
+
+pub fn has_piece(Array[Piece?], Int, PieceType, Color) -> Bool
+
+pub fn is_attacked(Array[Piece?], Int, Color) -> Bool
+
+pub fn king_in_check(Array[Piece?], Color) -> Bool
+
+pub let king_offsets : Array[Int]
+
+pub fn king_square(Array[Piece?], Color) -> Int?
+
+pub let knight_offsets : Array[Int]
+
+pub fn make_square(Int, Int) -> Int
+
+pub fn material_value(PieceType) -> Int
+
+pub fn on_board(Int) -> Bool
+
+pub fn parse_square(String) -> Int?
+
+pub fn piece_at(Array[Piece?], Int) -> Piece?
+
+pub fn rank_letter(Int) -> String
+
+pub fn rank_of(Int) -> Int
+
+pub let rook_offsets : Array[Int]
+
+pub fn set_piece(Array[Piece?], Int, Piece?) -> Unit
+
+pub fn square_name(Int) -> String
+
+pub let start_fen : String
+
+// Errors
+
+// Types and methods
+pub struct Chess {
+  mut board : Array[Piece?]
+  mut turn : Color
+  mut castling : Int
+  mut ep : Int?
+  mut half_moves : Int
+  mut move_number : Int
+  history : Array[HistoryEntry]
+  positions : Array[String]
+  mut headers : Array[(String, String)]
+}
+pub fn Chess::best_move(Self, Int) -> Move?
+pub fn Chess::best_move_scored(Self, Int) -> (Move?, Int)
+pub fn Chess::board(Self) -> Array[Array[Piece?]]
+pub fn Chess::clear(Self) -> Unit
+pub fn Chess::evaluate(Self) -> Int
+pub fn Chess::fen(Self) -> String
+pub fn Chess::from_fen(String) -> Self?
+pub fn Chess::get(Self, String) -> Piece?
+pub fn Chess::has_legal_move(Self) -> Bool
+pub fn Chess::header(Self, String) -> String?
+pub fn Chess::history(Self) -> Array[Move]
+pub fn Chess::is_check(Self) -> Bool
+pub fn Chess::is_checkmate(Self) -> Bool
+pub fn Chess::is_draw(Self) -> Bool
+pub fn Chess::is_game_over(Self) -> Bool
+pub fn Chess::is_insufficient_material(Self) -> Bool
+pub fn Chess::is_stalemate(Self) -> Bool
+pub fn Chess::is_threefold_repetition(Self) -> Bool
+pub fn Chess::load_fen(Self, String) -> Bool
+pub fn Chess::make_move(Self, Move) -> Unit
+pub fn Chess::move_by_san(Self, String) -> Move?
+pub fn Chess::move_count(Self) -> Int
+pub fn Chess::moves(Self) -> Array[Move]
+pub fn Chess::new() -> Self
+pub fn Chess::perft(Self, Int) -> Int
+pub fn Chess::piece_on(Self, Int) -> Piece?
+pub fn Chess::play(Self, String, String, PieceType?) -> Move?
+pub fn Chess::put(Self, PieceType, Color, String) -> Bool
+pub fn Chess::remove(Self, String) -> Piece?
+pub fn Chess::remove_header(Self, String) -> Unit
+pub fn Chess::reset(Self) -> Unit
+pub fn Chess::set_header(Self, String, String) -> Unit
+pub fn Chess::turn_color(Self) -> Color
+pub fn Chess::undo(Self) -> Move?
+pub fn Chess::undo_move(Self) -> Move?
+
+pub enum Color {
+  White
+  Black
+} derive(Eq, @debug.Debug)
+pub fn Color::index(Self) -> Int
+pub fn Color::opponent(Self) -> Self
+pub fn Color::to_char(Self) -> Char
+
+type HistoryEntry
+
+pub struct Move {
+  color : Color
+  from : Int
+  to : Int
+  piece : PieceType
+  promotion : PieceType?
+  captured : PieceType?
+  flags : String
+  san : String
+}
+
+pub struct Piece {
+  kind : PieceType
+  color : Color
+} derive(Eq, @debug.Debug)
+pub fn Piece::new(PieceType, Color) -> Self
+
+pub enum PieceType {
+  Pawn
+  Knight
+  Bishop
+  Rook
+  Queen
+  King
+} derive(Eq, @debug.Debug)
+pub fn PieceType::from_char(Char) -> Self?
+pub fn PieceType::to_char(Self) -> Char
+
+// Type aliases
+pub type Square = Int
+
+// Traits

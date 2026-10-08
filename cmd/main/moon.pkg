@@ -1,0 +1,6 @@
+import {
+  "poipoiiii/moonchess/lib",
+  "moonbitlang/core/env",
+}
+
+pkgtype(kind: "executable")

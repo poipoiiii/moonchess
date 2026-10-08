@@ -1,0 +1,11 @@
+# MoonBit
+_build/
+target/
+.mooncakes/
+.moon/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
