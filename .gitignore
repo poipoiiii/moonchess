@@ -4,6 +4,9 @@ target/
 .mooncakes/
 .moon/
 
+# Generated web bundle (produced by web/build.ps1)
+web/moonchess.js
+
 # Editor / OS
 .vscode/
 .idea/

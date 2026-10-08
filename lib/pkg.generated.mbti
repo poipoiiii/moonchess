@@ -113,11 +113,13 @@ pub fn Chess::perft_divide(Self, Int) -> Array[(String, Int)]
 pub fn Chess::pgn(Self, max_width? : Int) -> String
 pub fn Chess::piece_on(Self, Int) -> Piece?
 pub fn Chess::play(Self, String, String, PieceType?) -> Move?
+pub fn Chess::promotion_piece(Self, Int, Int) -> PieceType?
 pub fn Chess::put(Self, PieceType, Color, String) -> Bool
 pub fn Chess::remove(Self, String) -> Piece?
 pub fn Chess::remove_header(Self, String) -> Unit
 pub fn Chess::reset(Self) -> Unit
 pub fn Chess::set_header(Self, String, String) -> Unit
+pub fn Chess::side_is_white(Self) -> Bool
 pub fn Chess::turn_color(Self) -> Color
 pub fn Chess::undo(Self) -> Move?
 pub fn Chess::undo_move(Self) -> Move?
@@ -147,6 +149,8 @@ pub struct Piece {
   kind : PieceType
   color : Color
 } derive(Eq, @debug.Debug)
+pub fn Piece::fen_char(Self) -> Char
+pub fn Piece::is_white(Self) -> Bool
 pub fn Piece::new(PieceType, Color) -> Self
 
 pub enum PieceType {

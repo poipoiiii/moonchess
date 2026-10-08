@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>moonchess — MoonBit 国际象棋</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: #262421;
+        color: #eee;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+      }
+      h1 { font-size: 20px; font-weight: 600; margin: 0; }
+      header { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .sub { opacity: 0.7; font-size: 13px; }
+      #toolbar { display: flex; gap: 10px; align-items: center; }
+      button, select {
+        font: inherit;
+        padding: 6px 14px;
+        border-radius: 8px;
+        border: 1px solid #555;
+        background: #3a3733;
+        color: #eee;
+        cursor: pointer;
+      }
+      button:hover { background: #4a4641; }
+      #board { border-radius: 6px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+      #status {
+        font-size: 15px;
+        min-height: 22px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        background: #33302c;
+      }
+      footer { font-size: 12px; opacity: 0.6; }
+      code { background: #3a3733; padding: 1px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>moonchess</h1>
+      <div class="sub">
+        纯 MoonBit 实现的国际象棋库与引擎 · 点棋子选中，再点目标格走子
+      </div>
+    </header>
+    <div id="status"></div>
+    <div id="board"></div>
+    <div id="toolbar">
+      <button id="newGame">新对局</button>
+      <button id="undo">悔棋</button>
+      <label class="sub">
+        引擎强度
+        <select id="depth">
+          <option value="1">1 层</option>
+          <option value="2">2 层</option>
+          <option value="3" selected>3 层</option>
+          <option value="4">4 层</option>
+        </select>
+      </label>
+    </div>
+    <footer>
+      由 <code>moon build --target js</code> 生成 wasm/JS 后加载运行
+    </footer>
+    <script src="moonchess.js"></script>
+  </body>
+</html>

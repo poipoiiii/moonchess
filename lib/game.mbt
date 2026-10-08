@@ -459,6 +459,12 @@ pub fn Chess::turn_color(self : Chess) -> Color {
 }
 
 ///|
+/// Whether White is to move.
+pub fn Chess::side_is_white(self : Chess) -> Bool {
+  self.turn == White
+}
+
+///|
 /// Piece on a square (by index), if any.
 pub fn Chess::piece_on(self : Chess, sq : Square) -> Piece? {
   piece_at(self.board, sq)

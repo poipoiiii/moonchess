@@ -20,6 +20,7 @@
 - **置换表搜索**：64 位 Zobrist 哈希 + 2^16 项置换表，迭代加深（`Searcher`），支持时间限制。
 - **开局库**：内置常见开局线路，按 SAN 历史匹配。
 - **棋盘渲染**：`display()` 输出 Unicode / ASCII 棋盘。
+- **浏览器演示**：`web/` 用 JS FFI 在浏览器里渲染棋盘、点击走子并调用引擎对战。
 - **perft 自检**：内置 perft，对照公开标准用例验证走法生成。
 
 ## 项目结构
@@ -41,6 +42,7 @@ moonchess/
 │   └── moonchess_wbtest.mbt  # 测试（含 perft 套件）
 ├── cmd/main/                 # 命令行前端
 ├── examples/demo/            # 可运行示例
+├── web/                      # 浏览器演示（MoonBit + JS FFI）
 ├── docs/design.md            # 设计说明
 └── .github/workflows/        # CI（check / test / fmt / info）
 ```
@@ -101,6 +103,20 @@ moon run cmd/main -- fen              # 打印当前 FEN
 ```bash
 moon run examples/demo
 ```
+
+### 浏览器演示
+
+`web/` 是一个纯 MoonBit 驱动的网页版：棋盘渲染、点击走子、引擎应招都在 MoonBit 里完成，
+通过 `extern "js"` 与 DOM 交互。
+
+```bash
+# 1. 构建 JS 产物并复制到 web/moonchess.js
+powershell -ExecutionPolicy Bypass -File web/build.ps1
+# 2. 起一个静态服务器
+python -m http.server 8000 --directory web
+```
+
+浏览器打开 http://localhost:8000/ ，点击棋子选中，再点击目标格走子，引擎会按所选强度应招。
 
 ## 正确性
 

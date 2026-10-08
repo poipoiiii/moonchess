@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "poipoiiii/moonchess/web"
+
+// Values
+pub fn js_bind_buttons() -> Unit
+
+pub fn js_dom_init() -> Unit
+
+pub fn js_engine_depth() -> Int
+
+pub fn js_render(String, String, Int) -> Unit
+
+pub fn js_set_on_cell((Int, Int) -> Unit) -> Unit
+
+pub fn js_set_on_new(() -> Unit) -> Unit
+
+pub fn js_set_on_undo(() -> Unit) -> Unit
+
+// Errors
+
+// Types and methods
+type App
+
+// Type aliases
+
+// Traits

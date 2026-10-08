@@ -508,6 +508,24 @@ pub fn Chess::play(
 }
 
 ///|
+/// The promotion piece for a pawn move from `from` to `to` (a queen here).
+pub fn Chess::promotion_piece(
+  self : Chess,
+  from : Square,
+  to : Square,
+) -> PieceType? {
+  match self.board[from] {
+    Some(p) =>
+      if p.kind == Pawn && (rank_of(to) == 7 || rank_of(to) == 0) {
+        Some(Queen)
+      } else {
+        None
+      }
+    None => None
+  }
+}
+
+///|
 /// Undo the most recent move.
 pub fn Chess::undo(self : Chess) -> Move? {
   self.undo_move()

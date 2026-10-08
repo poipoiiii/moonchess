@@ -107,6 +107,23 @@ pub fn Piece::new(kind : PieceType, color : Color) -> Piece {
 }
 
 ///|
+/// Whether the piece belongs to White.
+pub fn Piece::is_white(self : Piece) -> Bool {
+  self.color == White
+}
+
+///|
+/// FEN letter for the piece: upper case for White, lower case for Black.
+pub fn Piece::fen_char(self : Piece) -> Char {
+  let c = self.kind.to_char()
+  if self.color == White {
+    c.to_ascii_uppercase()
+  } else {
+    c
+  }
+}
+
+///|
 /// Castling-rights bit flags.
 pub let castle_white_king : Int = 1
 
