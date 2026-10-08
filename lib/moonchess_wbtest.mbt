@@ -154,3 +154,52 @@ test "square helpers round-trip" {
     }
   }
 }
+
+///|
+test "pgn round trip preserves the position" {
+  let game = Chess::new()
+  ignore(game.move_by_san("e4"))
+  ignore(game.move_by_san("e5"))
+  ignore(game.move_by_san("Nf3"))
+  ignore(game.move_by_san("Nc6"))
+  ignore(game.move_by_san("Bb5"))
+  let text = game.pgn()
+  let reloaded = Chess::new()
+  assert_true(reloaded.load_pgn(text))
+  assert_eq(reloaded.move_count(), 5)
+  assert_eq(reloaded.fen(), game.fen())
+}
+
+///|
+test "pgn parser skips comments variations and nags" {
+  let pgn = "[Event \"Test\"]\n\n1. e4 {best by test} e5 (1... c5 2. Nf3) 2. Nf3 $1 Nc6 1/2-1/2\n"
+  let game = Chess::new()
+  assert_true(game.load_pgn(pgn))
+  assert_eq(game.move_count(), 4)
+  assert_eq(game.header("Event"), Some("Test"))
+  assert_eq(game.header("Result"), Some("1/2-1/2"))
+}
+
+///|
+test "pgn accepts inline move numbers" {
+  let game = Chess::new()
+  assert_true(game.load_pgn("1.e4 e5 2.Nf3 Nc6"))
+  assert_eq(game.move_count(), 4)
+}
+
+///|
+test "pgn accepts san without a check suffix" {
+  let game = Chess::new()
+  assert_true(game.load_pgn("1. f3 e5 2. g4 Qh4"))
+  assert_true(game.is_checkmate())
+}
+
+///|
+test "pgn emits the seven tag roster" {
+  let game = Chess::new()
+  ignore(game.move_by_san("d4"))
+  let text = game.pgn()
+  assert_true(text.contains("[Event "))
+  assert_true(text.contains("[Result \"*\"]"))
+  assert_true(text.contains("1. d4 *"))
+}
