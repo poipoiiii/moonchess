@@ -9,10 +9,21 @@
 struct App {
   game : @lib.Chess
   mut selected : Int
+  mut last_from : Int
+  mut last_to : Int
+  mut animate : Bool
+  mut busy : Bool
 }
 
 ///|
-let app : App = { game: @lib.Chess::new(), selected: -1, }
+let app : App = {
+  game: @lib.Chess::new(),
+  selected: -1,
+  last_from: -1,
+  last_to: -1,
+  animate: false,
+  busy: false,
+}
 
 ///|
 /// Human-readable status line.
@@ -34,7 +45,25 @@ fn status_text(g : @lib.Chess) -> String {
 }
 
 ///|
-/// Render the board and status through the FFI.
+/// Comma-separated destination squares for the selected piece.
+fn targets_for(g : @lib.Chess, from : Int) -> String {
+  if from < 0 {
+    return ""
+  }
+  let mut out = ""
+  for m in g.moves() {
+    if m.from == from {
+      if out != "" {
+        out = out + ","
+      }
+      out = out + m.to.to_string()
+    }
+  }
+  out
+}
+
+///|
+/// Render the board, hints and status through the FFI.
 fn render() -> Unit {
   let g = app.game
   let mut cells = ""
@@ -50,31 +79,57 @@ fn render() -> Unit {
     }
     rank = rank - 1
   }
-  js_render(cells, status_text(g), app.selected)
+  js_render(
+    cells,
+    status_text(g),
+    app.selected,
+    targets_for(g, app.selected),
+    app.last_from,
+    app.last_to,
+    app.animate,
+  )
+}
+
+///|
+/// Render after a move, animating the piece from `from` to `to` once.
+fn render_move(m : @lib.Move) -> Unit {
+  app.last_from = m.from
+  app.last_to = m.to
+  app.animate = true
+  render()
+  app.animate = false
 }
 
 ///|
 /// Let the engine play one move for the side to move.
 fn engine_reply() -> Unit {
   let g = app.game
-  if g.is_game_over() {
+  if g.is_game_over() || g.side_is_white() {
+    app.busy = false
+    app.animate = false
     render()
     return
   }
   let searcher = @lib.Searcher::new()
   let depth = js_engine_depth()
   match searcher.search(g, depth).best {
-    Some(m) => g.make_move(m)
-    None => ()
+    Some(m) => {
+      g.make_move(m)
+      render_move(m)
+    }
+    None => {
+      app.animate = false
+      render()
+    }
   }
-  render()
+  app.busy = false
 }
 
 ///|
 /// Handle a click on board cell `(row, col)` where row 0 is rank 8.
 fn on_cell(row : Int, col : Int) -> Unit {
   let g = app.game
-  if g.is_game_over() {
+  if app.busy || g.is_game_over() {
     return
   }
   let sq = @lib.make_square(col, 7 - row)
@@ -82,6 +137,7 @@ fn on_cell(row : Int, col : Int) -> Unit {
     Some(p) =>
       if p.is_white() == g.side_is_white() {
         app.selected = sq
+        app.animate = false
         render()
         return
       }
@@ -93,13 +149,16 @@ fn on_cell(row : Int, col : Int) -> Unit {
   let from = app.selected
   let promo = g.promotion_piece(from, sq)
   match g.play(@lib.square_name(from), @lib.square_name(sq), promo) {
-    Some(_) => {
+    Some(m) => {
       app.selected = -1
-      render()
-      engine_reply()
+      app.busy = true
+      render_move(m)
+      // Let the player's move animate, then let the engine think and reply.
+      js_defer(engine_reply, 220)
     }
     None => {
       app.selected = -1
+      app.animate = false
       render()
     }
   }
@@ -110,6 +169,10 @@ fn on_cell(row : Int, col : Int) -> Unit {
 fn on_new_game() -> Unit {
   app.game.reset()
   app.selected = -1
+  app.last_from = -1
+  app.last_to = -1
+  app.animate = false
+  app.busy = false
   render()
 }
 
@@ -120,6 +183,10 @@ fn on_undo() -> Unit {
   ignore(g.undo())
   ignore(g.undo())
   app.selected = -1
+  app.last_from = -1
+  app.last_to = -1
+  app.animate = false
+  app.busy = false
   render()
 }
 

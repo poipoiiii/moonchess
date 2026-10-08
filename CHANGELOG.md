@@ -19,7 +19,7 @@
 - 开局库（常见开局线路，测试校验每条线路均可合法走完）。
 - PGN 导入导出（容忍注释、变例、NAG 与内联回合号）。
 - 棋盘渲染：Unicode / ASCII（`display`）。
-- 浏览器演示：MoonBit 驱动 DOM 的 JS 网页版（`web/`）。
+- 浏览器演示：MoonBit 驱动 DOM 的 JS 网页版（`web/`），含选中/合法目标高亮与走子动画。
 - 命令行：`board` / `perft` / `divide` / `best` / `think` / `timed` / `selfplay` / `book` /
   `validate` / `fen`。
 - 可运行示例：`examples/demo`。

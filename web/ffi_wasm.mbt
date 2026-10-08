@@ -27,11 +27,24 @@ pub fn js_bind_buttons() -> Unit {
 }
 
 ///|
-pub fn js_render(cells : String, status : String, selected : Int) -> Unit {
-  ignore((cells, status, selected))
+pub fn js_render(
+  cells : String,
+  status : String,
+  selected : Int,
+  targets : String,
+  from : Int,
+  to : Int,
+  animate : Bool,
+) -> Unit {
+  ignore((cells, status, selected, targets, from, to, animate))
 }
 
 ///|
 pub fn js_engine_depth() -> Int {
   3
+}
+
+///|
+pub fn js_defer(cb : () -> Unit, ms : Int) -> Unit {
+  ignore((cb, ms))
 }

@@ -107,7 +107,8 @@ moon run examples/demo
 ### 浏览器演示
 
 `web/` 是一个纯 MoonBit 驱动的网页版：棋盘渲染、点击走子、引擎应招都在 MoonBit 里完成，
-通过 `extern "js"` 与 DOM 交互。
+通过 `extern "js"` 与 DOM 交互。点棋子会高亮选中格与全部合法目标格（空格显示圆点、可吃子显示
+圆环），走子带滑动动画。
 
 ```bash
 # 1. 构建 JS 产物并复制到 web/moonchess.js
