@@ -326,3 +326,20 @@ test "timed search finds a mate in one" {
     None => assert_true(false)
   }
 }
+
+///|
+test "threefold repetition is detected" {
+  let game = Chess::new()
+  for san in ["Nf3", "Nf6", "Ng1", "Ng8", "Nf3", "Nf6", "Ng1", "Ng8"] {
+    ignore(game.move_by_san(san))
+  }
+  assert_true(game.is_threefold_repetition())
+  assert_true(game.is_draw())
+}
+
+///|
+test "fifty move rule is a draw" {
+  let game = Chess::from_fen("4k3/8/8/8/8/8/8/R3K3 w - - 100 60").unwrap()
+  assert_true(game.is_draw())
+  assert_false(game.is_insufficient_material())
+}
