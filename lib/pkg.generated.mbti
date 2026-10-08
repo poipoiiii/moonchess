@@ -83,6 +83,7 @@ pub fn Chess::fen(Self) -> String
 pub fn Chess::from_fen(String) -> Self?
 pub fn Chess::get(Self, String) -> Piece?
 pub fn Chess::has_legal_move(Self) -> Bool
+pub fn Chess::hash(Self) -> UInt64
 pub fn Chess::header(Self, String) -> String?
 pub fn Chess::history(Self) -> Array[Move]
 pub fn Chess::is_check(Self) -> Bool
@@ -148,7 +149,24 @@ pub enum PieceType {
   King
 } derive(Eq, @debug.Debug)
 pub fn PieceType::from_char(Char) -> Self?
+pub fn PieceType::index(Self) -> Int
 pub fn PieceType::to_char(Self) -> Char
+
+pub struct SearchResult {
+  best : Move?
+  score : Int
+  depth : Int
+  nodes : Int
+}
+
+pub struct Searcher {
+  tt : Array[TTEntry]
+  mut nodes : Int
+}
+pub fn Searcher::new() -> Self
+pub fn Searcher::search(Self, Chess, Int) -> SearchResult
+
+type TTEntry
 
 // Type aliases
 pub type Square = Int

@@ -203,3 +203,27 @@ test "pgn emits the seven tag roster" {
   assert_true(text.contains("[Result \"*\"]"))
   assert_true(text.contains("1. d4 *"))
 }
+
+///|
+test "zobrist hash is stable and position sensitive" {
+  let a = Chess::new()
+  let b = Chess::new()
+  assert_true(a.hash() == b.hash())
+  ignore(b.move_by_san("e4"))
+  assert_true(a.hash() != b.hash())
+}
+
+///|
+test "searcher finds a mate in one" {
+  let game = Chess::from_fen("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1").unwrap()
+  let searcher = Searcher::new()
+  let result = searcher.search(game, 3)
+  assert_eq(result.depth, 1)
+  match result.best {
+    Some(m) => {
+      game.make_move(m)
+      assert_true(game.is_checkmate())
+    }
+    None => assert_true(false)
+  }
+}

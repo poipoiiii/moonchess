@@ -54,6 +54,19 @@ pub enum PieceType {
 } derive(Eq, Debug)
 
 ///|
+/// `0..5` index for the piece kind (pawn = 0).
+pub fn PieceType::index(self : PieceType) -> Int {
+  match self {
+    Pawn => 0
+    Knight => 1
+    Bishop => 2
+    Rook => 3
+    Queen => 4
+    King => 5
+  }
+}
+
+///|
 /// Lower-case FEN letter for the piece kind.
 pub fn PieceType::to_char(self : PieceType) -> Char {
   match self {
