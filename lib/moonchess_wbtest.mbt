@@ -343,3 +343,25 @@ test "fifty move rule is a draw" {
   assert_true(game.is_draw())
   assert_false(game.is_insufficient_material())
 }
+
+///|
+test "validate_fen accepts legal positions" {
+  assert_true(is_valid_fen(start_fen))
+  assert_true(is_valid_fen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1"))
+  assert_true(validate_fen(start_fen) is None)
+}
+
+///|
+test "validate_fen rejects malformed positions" {
+  assert_true(
+    validate_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0")
+    is Some(_),
+  )
+  assert_true(
+    validate_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN w KQkq - 0 1")
+    is Some(_),
+  )
+  assert_true(validate_fen("8/8/8/8/8/8/8/8 w - - 0 1") is Some(_))
+  assert_true(validate_fen("4k3/8/8/8/8/8/8/P3K3 w - - 0 1") is Some(_))
+  assert_true(validate_fen("4k3/8/8/8/8/8/8/4RK2 w - - 0 1") is Some(_))
+}

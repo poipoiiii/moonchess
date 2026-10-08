@@ -32,6 +32,8 @@ pub fn has_piece(Array[Piece?], Int, PieceType, Color) -> Bool
 
 pub fn is_attacked(Array[Piece?], Int, Color) -> Bool
 
+pub fn is_valid_fen(String) -> Bool
+
 pub fn king_in_check(Array[Piece?], Color) -> Bool
 
 pub let king_offsets : Array[Int]
@@ -61,6 +63,8 @@ pub fn set_piece(Array[Piece?], Int, Piece?) -> Unit
 pub fn square_name(Int) -> String
 
 pub let start_fen : String
+
+pub fn validate_fen(String) -> String?
 
 // Errors
 

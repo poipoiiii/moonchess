@@ -91,7 +91,8 @@ fn usage() -> Unit {
     "  moonchess book <san...>             play moves, then print a book reply",
   )
   println("  moonchess board [fen]               print the board and FEN")
-  println("  moonchess fen [fen]                 validate and echo a FEN")
+  println("  moonchess validate <fen>            check that a FEN is legal")
+  println("  moonchess fen [fen]                 echo a FEN")
 }
 
 ///|
@@ -176,6 +177,13 @@ fn main {
     "fen" => {
       let game = game_from(args, 2)
       println(game.fen())
+    }
+    "validate" => {
+      let fen = if args.length() > 2 { args[2] } else { "" }
+      match @lib.validate_fen(fen) {
+        Some(msg) => println("invalid: \{msg}")
+        None => println("valid")
+      }
     }
     _ => usage()
   }

@@ -91,6 +91,7 @@ moon run cmd/main -- think 6          # 迭代加深 + 置换表
 moon run cmd/main -- timed 1500       # 限时 1500ms 搜索
 moon run cmd/main -- selfplay 3 20    # 自我对弈（开局用开局库）
 moon run cmd/main -- book e4 e5 Nf3   # 查询开局库续着
+moon run cmd/main -- validate "<fen>" # FEN 合法性校验
 moon run cmd/main -- fen              # 打印当前 FEN
 ```
 
