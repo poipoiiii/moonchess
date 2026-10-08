@@ -35,17 +35,26 @@ fn game_from(args : Array[String], index : Int) -> @lib.Chess {
 
 ///|
 /// Play a self-play game, printing one SAN move per line.
+/// Uses the opening book for the first few plies, then the engine.
 fn selfplay(depth : Int, max_plies : Int) -> Unit {
   let game = @lib.Chess::new()
   let mut played = 0
   while played < max_plies && !game.is_game_over() {
-    match game.best_move(depth) {
+    let book = if played < 6 { game.book_move() } else { None }
+    match book {
       Some(m) => {
         println(m.san)
-        game.make_move(m)
         played = played + 1
       }
-      None => break
+      None =>
+        match game.best_move(depth) {
+          Some(m) => {
+            println(m.san)
+            game.make_move(m)
+            played = played + 1
+          }
+          None => break
+        }
     }
   }
   println("---")
@@ -77,6 +86,9 @@ fn usage() -> Unit {
     "  moonchess think <depth> [fen]       iterative-deepening search with a TT",
   )
   println("  moonchess selfplay <depth> [plies]  print a self-play game in SAN")
+  println(
+    "  moonchess book <san...>             play moves, then print a book reply",
+  )
   println("  moonchess fen [fen]                 validate and echo a FEN")
 }
 
@@ -124,6 +136,18 @@ fn main {
         40
       }
       selfplay(depth, plies)
+    }
+    "book" => {
+      let game = @lib.Chess::new()
+      let mut i = 2
+      while i < args.length() {
+        ignore(game.move_by_san(args[i]))
+        i = i + 1
+      }
+      match game.book_move() {
+        Some(m) => println("book: \{m.san}")
+        None => println("book: (no known continuation)")
+      }
     }
     "fen" => {
       let game = game_from(args, 2)

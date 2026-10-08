@@ -8,6 +8,8 @@ import {
 // Values
 pub let bishop_offsets : Array[Int]
 
+pub fn book_size() -> Int
+
 pub let castle_black_king : Int
 
 pub let castle_black_queen : Int
@@ -77,6 +79,7 @@ pub struct Chess {
 pub fn Chess::best_move(Self, Int) -> Move?
 pub fn Chess::best_move_scored(Self, Int) -> (Move?, Int)
 pub fn Chess::board(Self) -> Array[Array[Piece?]]
+pub fn Chess::book_move(Self) -> Move?
 pub fn Chess::clear(Self) -> Unit
 pub fn Chess::evaluate(Self) -> Int
 pub fn Chess::fen(Self) -> String

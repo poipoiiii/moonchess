@@ -227,3 +227,25 @@ test "searcher finds a mate in one" {
     None => assert_true(false)
   }
 }
+
+///|
+test "opening book plays a known reply" {
+  let game = Chess::new()
+  ignore(game.move_by_san("e4"))
+  match game.book_move() {
+    Some(m) => assert_eq(m.san, "e5")
+    None => assert_true(false)
+  }
+}
+
+///|
+test "opening book returns nothing off-book" {
+  let game = Chess::new()
+  ignore(game.move_by_san("a3"))
+  assert_true(game.book_move() is None)
+}
+
+///|
+test "opening book is not empty" {
+  assert_true(book_size() > 0)
+}
