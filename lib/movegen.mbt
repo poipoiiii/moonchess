@@ -1,43 +1,6 @@
 /// Legal move generation, SAN notation, and turn-based game status.
 
 ///|
-/// Home squares used by castling generation (0x88 indices).
-let sq_b1 : Int = 1
-
-///|
-let sq_c1 : Int = 2
-
-///|
-let sq_d1 : Int = 3
-
-///|
-let sq_e1 : Int = 4
-
-///|
-let sq_f1 : Int = 5
-
-///|
-let sq_g1 : Int = 6
-
-///|
-let sq_b8 : Int = 113
-
-///|
-let sq_c8 : Int = 114
-
-///|
-let sq_d8 : Int = 115
-
-///|
-let sq_e8 : Int = 116
-
-///|
-let sq_f8 : Int = 117
-
-///|
-let sq_g8 : Int = 118
-
-///|
 /// File letter for a file index `0..7`.
 pub fn file_letter(file : Int) -> String {
   match "abcdefgh".get_char(file) {
@@ -249,47 +212,123 @@ fn Chess::gen_pawn_moves(
 }
 
 ///|
-/// Castling moves, if the rights and empty squares allow them.
+/// Castling moves for the king on `from`, honouring Chess960 rook squares.
 fn Chess::gen_castling_moves(
   self : Chess,
   moves : Array[Move],
   from : Square,
   us : Color,
 ) -> Unit {
-  let them = us.opponent()
-  if us == White && from == sq_e1 {
-    if (self.castling & castle_white_king) != 0 &&
-      self.board[sq_f1] is None &&
-      self.board[sq_g1] is None &&
-      !is_attacked(self.board, sq_e1, them) &&
-      !is_attacked(self.board, sq_f1, them) {
-      moves.push(self.new_move(King, sq_e1, sq_g1, None, None, "k"))
-    }
-    if (self.castling & castle_white_queen) != 0 &&
-      self.board[sq_b1] is None &&
-      self.board[sq_c1] is None &&
-      self.board[sq_d1] is None &&
-      !is_attacked(self.board, sq_e1, them) &&
-      !is_attacked(self.board, sq_d1, them) {
-      moves.push(self.new_move(King, sq_e1, sq_c1, None, None, "q"))
-    }
+  let back = if us == White { 0 } else { 7 }
+  if rank_of(from) != back {
+    return
   }
-  if us == Black && from == sq_e8 {
-    if (self.castling & castle_black_king) != 0 &&
-      self.board[sq_f8] is None &&
-      self.board[sq_g8] is None &&
-      !is_attacked(self.board, sq_e8, them) &&
-      !is_attacked(self.board, sq_f8, them) {
-      moves.push(self.new_move(King, sq_e8, sq_g8, None, None, "k"))
+  self.try_castle(moves, from, us, back, true)
+  self.try_castle(moves, from, us, back, false)
+}
+
+///|
+/// Whether every square from `a` to `b` (inclusive) is empty, ignoring the
+/// king and the castling rook themselves.
+fn Chess::castle_path_clear(
+  self : Chess,
+  a : Int,
+  b : Int,
+  back : Int,
+  king_sq : Square,
+  rook_sq : Square,
+) -> Bool {
+  let lo = if a < b { a } else { b }
+  let hi = if a < b { b } else { a }
+  let mut f = lo
+  while f <= hi {
+    let sq = make_square(f, back)
+    if sq != king_sq && sq != rook_sq {
+      if self.board[sq] is Some(_) {
+        return false
+      }
     }
-    if (self.castling & castle_black_queen) != 0 &&
-      self.board[sq_b8] is None &&
-      self.board[sq_c8] is None &&
-      self.board[sq_d8] is None &&
-      !is_attacked(self.board, sq_e8, them) &&
-      !is_attacked(self.board, sq_d8, them) {
-      moves.push(self.new_move(King, sq_e8, sq_c8, None, None, "q"))
+    f = f + 1
+  }
+  true
+}
+
+///|
+/// Try one castling side: king and rook present, paths clear, and the king
+/// neither in check nor passing through an attacked square.
+fn Chess::try_castle(
+  self : Chess,
+  moves : Array[Move],
+  from : Square,
+  us : Color,
+  back : Int,
+  kingside : Bool,
+) -> Unit {
+  let index = castle_index(us, kingside)
+  if (self.castling & castle_bits[index]) == 0 {
+    return
+  }
+  let rook_file = self.castle_rook[index]
+  if rook_file < 0 {
+    return
+  }
+  let rook_sq = make_square(rook_file, back)
+  match self.board[rook_sq] {
+    Some(p) => if p.kind != Rook || p.color != us { return }
+    None => return
+  }
+  let king_file = file_of(from)
+  let king_to_file = if kingside { 6 } else { 2 }
+  let rook_to_file = if kingside { 5 } else { 3 }
+  // Squares strictly between king and rook must be empty.
+  let lo = if king_file < rook_file { king_file } else { rook_file }
+  let hi = if king_file < rook_file { rook_file } else { king_file }
+  let mut f = lo + 1
+  while f < hi {
+    if self.board[make_square(f, back)] is Some(_) {
+      return
     }
+    f = f + 1
+  }
+  // King path and rook path must be clear.
+  if !self.castle_path_clear(king_file, king_to_file, back, from, rook_sq) {
+    return
+  }
+  if !self.castle_path_clear(rook_file, rook_to_file, back, from, rook_sq) {
+    return
+  }
+  // The king may not start in check nor pass through an attacked square.
+  let them = us.opponent()
+  f = lo_of(king_file, king_to_file)
+  while f <= hi_of(king_file, king_to_file) {
+    if is_attacked(self.board, make_square(f, back), them) {
+      return
+    }
+    f = f + 1
+  }
+  let flag = if kingside { "k" } else { "q" }
+  moves.push(
+    self.new_move(King, from, make_square(king_to_file, back), None, None, flag),
+  )
+}
+
+///|
+/// Smaller of two integers.
+fn lo_of(a : Int, b : Int) -> Int {
+  if a < b {
+    a
+  } else {
+    b
+  }
+}
+
+///|
+/// Larger of two integers.
+fn hi_of(a : Int, b : Int) -> Int {
+  if a < b {
+    b
+  } else {
+    a
   }
 }
 

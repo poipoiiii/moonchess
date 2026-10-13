@@ -2,30 +2,18 @@
 /// position queries (check, insufficient material, repetition).
 
 ///|
-/// Home-square indices used for castling-right updates.
-let square_a1 : Int = 0
+/// Castling bit masks used to clear individual rights, indexed by right
+/// (0 = White king-side, 1 = White queen-side, 2 = Black king-side,
+/// 3 = Black queen-side).
+let mask_keep : Array[Int] = [14, 13, 11, 7]
 
 ///|
-let square_h1 : Int = 7
+/// Castling-right bits, in the same index order as `mask_keep`.
+let castle_bits : Array[Int] = [1, 2, 4, 8]
 
 ///|
-let square_a8 : Int = 112
-
-///|
-let square_h8 : Int = 119
-
-///|
-/// Castling bit masks used to clear individual rights.
-let mask_keep_wk : Int = 14
-
-///|
-let mask_keep_wq : Int = 13
-
-///|
-let mask_keep_bk : Int = 11
-
-///|
-let mask_keep_bq : Int = 7
+/// Back rank of each castling right's owner.
+let castle_back_rank : Array[Int] = [0, 0, 7, 7]
 
 ///|
 /// The standard opening position in FEN.
@@ -49,12 +37,108 @@ pub struct Chess {
   mut board : Array[Piece?]
   mut turn : Color
   mut castling : Int
+  /// Start files of the king-side / queen-side rooks for each castling right
+  /// (index order as `castle_bits`), or -1. Fixed for the whole game so that
+  /// `undo` can always find the rook (Chess960).
+  mut castle_rook : Array[Int]
   mut ep : Square?
   mut half_moves : Int
   mut move_number : Int
   history : Array[HistoryEntry]
   positions : Array[String]
   mut headers : Array[(String, String)]
+}
+
+///|
+/// Index of a castling right (0 = White king-side, 1 = White queen-side,
+/// 2 = Black king-side, 3 = Black queen-side).
+fn castle_index(color : Color, kingside : Bool) -> Int {
+  match color {
+    White => if kingside { 0 } else { 1 }
+    Black => if kingside { 2 } else { 3 }
+  }
+}
+
+///|
+/// File of `color`'s king on its back rank, or -1.
+fn Chess::king_file_on_back_rank(self : Chess, color : Color) -> Int {
+  let back = if color == White { 0 } else { 7 }
+  let mut f = 0
+  while f < 8 {
+    match self.board[make_square(f, back)] {
+      Some(p) => if p.kind == King && p.color == color { return f }
+      None => ()
+    }
+    f = f + 1
+  }
+  -1
+}
+
+///|
+/// Resolve a `K` / `Q` castling letter to the outermost rook file on that side.
+fn Chess::resolve_castle_rook(
+  self : Chess,
+  color : Color,
+  kingside : Bool,
+) -> Int {
+  let king_file = self.king_file_on_back_rank(color)
+  if king_file < 0 {
+    return -1
+  }
+  let back = if color == White { 0 } else { 7 }
+  let mut best = -1
+  let mut f = 0
+  while f < 8 {
+    match self.board[make_square(f, back)] {
+      Some(p) =>
+        if p.kind == Rook && p.color == color {
+          if kingside {
+            if f > king_file && f > best {
+              best = f
+            }
+          } else if f < king_file && (best < 0 || f < best) {
+            best = f
+          }
+        }
+      None => ()
+    }
+    f = f + 1
+  }
+  best
+}
+
+///|
+/// Record a resolved castling right (rook file + availability bit).
+fn Chess::set_castle_right(
+  self : Chess,
+  color : Color,
+  kingside : Bool,
+  file : Int,
+) -> Unit {
+  if file >= 0 {
+    let index = castle_index(color, kingside)
+    self.castle_rook[index] = file
+    self.castling = self.castling | castle_bits[index]
+  }
+}
+
+///|
+/// Castling letter for a rook file: `K`/`Q`/`k`/`q` when the rook sits on the
+/// standard outer file, otherwise the file letter (upper case for White,
+/// lower case for Black) as used by X-FEN / Shredder-FEN.
+fn castle_char(file : Int, color : Color, kingside : Bool) -> String {
+  let standard = if kingside { 7 } else { 0 }
+  if file == standard {
+    match (color, kingside) {
+      (White, true) => "K"
+      (White, false) => "Q"
+      (Black, true) => "k"
+      (Black, false) => "q"
+    }
+  } else {
+    let base = if color == White { 'A'.to_int() } else { 'a'.to_int() }
+    (base + file).unsafe_to_char().to_string()
+  }
 }
 
 ///|
@@ -91,6 +175,7 @@ pub fn Chess::new() -> Chess {
     board: empty_board(),
     turn: White,
     castling: 0,
+    castle_rook: [-1, -1, -1, -1],
     ep: None,
     half_moves: 0,
     move_number: 1,
@@ -119,6 +204,7 @@ pub fn Chess::clear(self : Chess) -> Unit {
   self.board = empty_board()
   self.turn = White
   self.castling = 0
+  self.castle_rook = [-1, -1, -1, -1]
   self.ep = None
   self.half_moves = 0
   self.move_number = 1
@@ -185,18 +271,53 @@ pub fn Chess::load_fen(self : Chess, fen : String) -> Bool {
     "b" => self.turn = Black
     _ => return false
   }
-  // 3. Castling availability.
-  if tokens[2].contains("K") {
-    self.castling = self.castling | castle_white_king
-  }
-  if tokens[2].contains("Q") {
-    self.castling = self.castling | castle_white_queen
-  }
-  if tokens[2].contains("k") {
-    self.castling = self.castling | castle_black_king
-  }
-  if tokens[2].contains("q") {
-    self.castling = self.castling | castle_black_queen
+  // 3. Castling availability (standard KQkq or Chess960 file letters).
+  if tokens[2] != "-" {
+    for ch in tokens[2].to_array() {
+      match ch {
+        'K' =>
+          self.set_castle_right(
+            White,
+            true,
+            self.resolve_castle_rook(White, true),
+          )
+        'Q' =>
+          self.set_castle_right(
+            White,
+            false,
+            self.resolve_castle_rook(White, false),
+          )
+        'k' =>
+          self.set_castle_right(
+            Black,
+            true,
+            self.resolve_castle_rook(Black, true),
+          )
+        'q' =>
+          self.set_castle_right(
+            Black,
+            false,
+            self.resolve_castle_rook(Black, false),
+          )
+        'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' => {
+          let file = ch.to_int() - 'A'.to_int()
+          self.set_castle_right(
+            White,
+            file > self.king_file_on_back_rank(White),
+            file,
+          )
+        }
+        'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' => {
+          let file = ch.to_int() - 'a'.to_int()
+          self.set_castle_right(
+            Black,
+            file > self.king_file_on_back_rank(Black),
+            file,
+          )
+        }
+        _ => return false
+      }
+    }
   }
   // 4. En passant target square.
   if tokens[3] != "-" {
@@ -254,17 +375,17 @@ pub fn Chess::fen(self : Chess) -> String {
     rank = rank - 1
   }
   let mut castling = ""
-  if (self.castling & castle_white_king) != 0 {
-    castling = castling + "K"
+  if (self.castling & castle_bits[0]) != 0 {
+    castling = castling + castle_char(self.castle_rook[0], White, true)
   }
-  if (self.castling & castle_white_queen) != 0 {
-    castling = castling + "Q"
+  if (self.castling & castle_bits[1]) != 0 {
+    castling = castling + castle_char(self.castle_rook[1], White, false)
   }
-  if (self.castling & castle_black_king) != 0 {
-    castling = castling + "k"
+  if (self.castling & castle_bits[2]) != 0 {
+    castling = castling + castle_char(self.castle_rook[2], Black, true)
   }
-  if (self.castling & castle_black_queen) != 0 {
-    castling = castling + "q"
+  if (self.castling & castle_bits[3]) != 0 {
+    castling = castling + castle_char(self.castle_rook[3], Black, false)
   }
   if castling == "" {
     castling = "-"
@@ -312,19 +433,18 @@ fn Chess::position_key(self : Chess) -> String {
 }
 
 ///|
-/// Clear castling rights tied to a rook home square that was vacated or captured.
-fn clear_castling_for(rights : Int, sq : Square) -> Int {
-  if sq == square_a1 {
-    rights & mask_keep_wq
-  } else if sq == square_h1 {
-    rights & mask_keep_wk
-  } else if sq == square_a8 {
-    rights & mask_keep_bq
-  } else if sq == square_h8 {
-    rights & mask_keep_bk
-  } else {
-    rights
+/// Clear castling rights whose rook home square was vacated or captured.
+fn Chess::clear_castling_for(self : Chess, rights : Int, sq : Square) -> Int {
+  let mut result = rights
+  let mut i = 0
+  while i < 4 {
+    let file = self.castle_rook[i]
+    if file >= 0 && sq == make_square(file, castle_back_rank[i]) {
+      result = result & mask_keep[i]
+    }
+    i = i + 1
   }
+  result
 }
 
 ///|
@@ -359,39 +479,45 @@ pub fn Chess::make_move(self : Chess, m : Move) -> Unit {
     captured,
     captured_square,
   })
-  // Remove the captured piece first: for normal captures its square equals
-  // `to`, and for en passant it is the square behind `to`.
-  if m.captured is Some(_) {
-    self.board[captured_square] = None
-  }
-  // Move the piece.
-  self.board[m.to] = Some(move_piece)
-  self.board[m.from] = None
-  // Promotion.
-  match m.promotion {
-    Some(kind) => self.board[m.to] = Some({ kind, color: us, })
-    None => ()
-  }
-  // Castling: relocate the rook.
-  if m.piece == King && abs_int(m.from, m.to) == 2 {
-    if m.to > m.from {
-      self.board[m.to - 1] = self.board[m.to + 1]
-      self.board[m.to + 1] = None
-    } else {
-      self.board[m.to + 1] = self.board[m.to - 2]
-      self.board[m.to - 2] = None
+  let is_castle = m.piece == King &&
+    (m.flags.contains("k") || m.flags.contains("q"))
+  if is_castle {
+    let kingside = m.flags.contains("k")
+    let index = castle_index(us, kingside)
+    let back = castle_back_rank[index]
+    let rook_from = make_square(self.castle_rook[index], back)
+    let rook_to_file = if kingside { 5 } else { 3 }
+    let rook_to = make_square(rook_to_file, back)
+    let rook = self.board[rook_from]
+    self.board[m.from] = None
+    self.board[rook_from] = None
+    self.board[m.to] = Some(move_piece)
+    self.board[rook_to] = rook
+  } else {
+    // Remove the captured piece first: for normal captures its square equals
+    // `to`, and for en passant it is the square behind `to`.
+    if m.captured is Some(_) {
+      self.board[captured_square] = None
+    }
+    // Move the piece.
+    self.board[m.to] = Some(move_piece)
+    self.board[m.from] = None
+    // Promotion.
+    match m.promotion {
+      Some(kind) => self.board[m.to] = Some({ kind, color: us, })
+      None => ()
     }
   }
   // Update castling rights.
   if m.piece == King {
     if us == White {
-      self.castling = self.castling & (castle_black_king | castle_black_queen)
+      self.castling = self.castling & (castle_bits[2] | castle_bits[3])
     } else {
-      self.castling = self.castling & (castle_white_king | castle_white_queen)
+      self.castling = self.castling & (castle_bits[0] | castle_bits[1])
     }
   }
-  self.castling = clear_castling_for(self.castling, m.from)
-  self.castling = clear_castling_for(self.castling, m.to)
+  self.castling = self.clear_castling_for(self.castling, m.from)
+  self.castling = self.clear_castling_for(self.castling, m.to)
   // En passant target square.
   if m.piece == Pawn && abs_int(m.from, m.to) == 32 {
     self.ep = Some((m.from + m.to) / 2)
@@ -425,27 +551,34 @@ pub fn Chess::undo_move(self : Chess) -> Move? {
       self.ep = e.ep
       self.half_moves = e.half_moves
       self.move_number = e.move_number
-      // Move the piece back.
-      self.board[m.from] = self.board[m.to]
-      self.board[m.to] = None
-      // Restore a promoted pawn.
-      if m.promotion is Some(_) {
-        self.board[m.from] = Some({ kind: Pawn, color: m.color, })
+      let is_castle = m.piece == King &&
+        (m.flags.contains("k") || m.flags.contains("q"))
+      if is_castle {
+        let kingside = m.flags.contains("k")
+        let index = castle_index(m.color, kingside)
+        let back = castle_back_rank[index]
+        let rook_from = make_square(self.castle_rook[index], back)
+        let rook_to_file = if kingside { 5 } else { 3 }
+        let rook_to = make_square(rook_to_file, back)
+        let rook = self.board[rook_to]
+        let king = self.board[m.to]
+        self.board[rook_to] = None
+        self.board[m.to] = None
+        self.board[rook_from] = rook
+        self.board[m.from] = king
+      } else {
+        // Move the piece back.
+        self.board[m.from] = self.board[m.to]
+        self.board[m.to] = None
+        // Restore a promoted pawn.
+        if m.promotion is Some(_) {
+          self.board[m.from] = Some({ kind: Pawn, color: m.color, })
+        }
       }
       // Restore the captured piece.
       match e.captured {
         Some(p) => self.board[e.captured_square] = Some(p)
         None => ()
-      }
-      // Undo castling rook move.
-      if m.piece == King && abs_int(m.from, m.to) == 2 {
-        if m.to > m.from {
-          self.board[m.to + 1] = self.board[m.to - 1]
-          self.board[m.to - 1] = None
-        } else {
-          self.board[m.to - 2] = self.board[m.to + 1]
-          self.board[m.to + 1] = None
-        }
       }
       Some(m)
     }

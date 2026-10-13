@@ -367,6 +367,70 @@ test "validate_fen rejects malformed positions" {
 }
 
 ///|
+test "value helpers expose colours" {
+  assert_true(Piece::new(King, White).is_white())
+  assert_false(Piece::new(King, Black).is_white())
+  assert_eq(Piece::new(Rook, Black).fen_char(), 'r')
+  assert_eq(Piece::new(Rook, White).fen_char(), 'R')
+}
+
+///|
+test "chess960 castling with arbitrary king and rook files" {
+  let game = Chess::from_fen("4k3/8/8/8/8/8/8/RK5R w KQ - 0 1").unwrap()
+  let sans : Array[String] = game.moves().map(fn(m) { m.san })
+  assert_true(sans.contains("O-O"))
+  assert_true(sans.contains("O-O-O"))
+  // King-side: king b1 -> g1, rook h1 -> f1.
+  ignore(game.move_by_san("O-O"))
+  assert_eq(game.get("g1"), Some({ kind: King, color: White, }))
+  assert_eq(game.get("f1"), Some({ kind: Rook, color: White, }))
+  ignore(game.undo())
+  assert_eq(game.fen(), "4k3/8/8/8/8/8/8/RK5R w KQ - 0 1")
+}
+
+///|
+test "chess960 queenside castling moves both pieces" {
+  let game = Chess::from_fen("4k3/8/8/8/8/8/8/RK5R w KQ - 0 1").unwrap()
+  ignore(game.move_by_san("O-O-O"))
+  assert_eq(game.get("c1"), Some({ kind: King, color: White, }))
+  assert_eq(game.get("d1"), Some({ kind: Rook, color: White, }))
+}
+
+///|
+test "chess960 castling where the king barely moves" {
+  // King b1, rook d1: king goes all the way to g1, rook d1 -> f1.
+  let game = Chess::from_fen("4k3/8/8/8/8/8/8/1K1R4 w D - 0 1").unwrap()
+  let m = game.move_by_san("O-O").unwrap()
+  assert_eq(m.from, parse_square("b1").unwrap())
+  assert_eq(game.get("g1"), Some({ kind: King, color: White, }))
+  assert_eq(game.get("f1"), Some({ kind: Rook, color: White, }))
+  assert_eq(game.fen(), "4k3/8/8/8/8/8/8/5RK1 b - - 1 1")
+}
+
+///|
+test "chess960 normalizes file-letter castling to KQ" {
+  let game = Chess::from_fen("4k3/8/8/8/8/8/8/1K5R w H - 0 1").unwrap()
+  assert_eq(game.fen(), "4k3/8/8/8/8/8/8/1K5R w K - 0 1")
+}
+
+///|
+test "chess960 castling right clears when the rook moves" {
+  let game = Chess::from_fen("4k3/8/8/8/8/8/8/RK5R w KQ - 0 1").unwrap()
+  ignore(game.play("h1", "h2", None))
+  assert_true(game.fen().contains(" b Q "))
+}
+
+///|
+test "chess960 move generation is self consistent" {
+  let game = Chess::from_fen(
+    "bbqnnrkr/pppppppp/8/8/8/8/PPPPPPPP/BBQNNRKR w HFhf - 0 1",
+  ).unwrap()
+  for depth = 1; depth <= 3; depth = depth + 1 {
+    assert_eq(game.perft(depth), perft_ref(game, depth))
+  }
+}
+
+///|
 test "perft divide sums to perft" {
   let game = Chess::new()
   let rows = game.perft_divide(3)

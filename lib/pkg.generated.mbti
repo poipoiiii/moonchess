@@ -73,6 +73,7 @@ pub struct Chess {
   mut board : Array[Piece?]
   mut turn : Color
   mut castling : Int
+  mut castle_rook : Array[Int]
   mut ep : Int?
   mut half_moves : Int
   mut move_number : Int
