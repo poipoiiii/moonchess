@@ -375,6 +375,25 @@ test "value helpers expose colours" {
 }
 
 ///|
+test "captured glyphs list taken pieces" {
+  let game = Chess::new()
+  ignore(game.move_by_san("e4"))
+  ignore(game.move_by_san("d5"))
+  ignore(game.move_by_san("exd5"))
+  let (by_white, by_black) = game.captured_glyphs()
+  assert_eq(by_white, "♟")
+  assert_eq(by_black, "")
+}
+
+///|
+test "promotion choice index maps to pieces" {
+  assert_eq(promotion_from_index(0), Queen)
+  assert_eq(promotion_from_index(1), Rook)
+  assert_eq(promotion_from_index(2), Bishop)
+  assert_eq(promotion_from_index(3), Knight)
+}
+
+///|
 test "chess960 castling with arbitrary king and rook files" {
   let game = Chess::from_fen("4k3/8/8/8/8/8/8/RK5R w KQ - 0 1").unwrap()
   let sans : Array[String] = game.moves().map(fn(m) { m.san })

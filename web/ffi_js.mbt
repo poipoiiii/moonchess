@@ -126,3 +126,53 @@ pub extern "js" fn js_engine_depth() -> Int =
 /// before the engine replies).
 pub extern "js" fn js_defer(cb : () -> Unit, ms : Int) -> Unit =
   #| function(cb, ms) { setTimeout(cb, ms); }
+
+///|
+/// Update the captured-pieces panel (glyphs taken by White and by Black).
+pub extern "js" fn js_set_captured(
+  by_white : String,
+  by_black : String,
+) -> Unit =
+  #| function(byWhite, byBlack) {
+  #|   const a = document.getElementById('capWhite');
+  #|   const b = document.getElementById('capBlack');
+  #|   if (a) a.textContent = byWhite;
+  #|   if (b) b.textContent = byBlack;
+  #| }
+
+///|
+/// Show the promotion picker; `cb` receives 0 = queen, 1 = rook, 2 = bishop,
+/// 3 = knight.
+pub extern "js" fn js_show_promotion(
+  is_white : Bool,
+  cb : (Int) -> Unit,
+) -> Unit =
+  #| function(isWhite, cb) {
+  #|   const box = document.getElementById('promotion');
+  #|   box.innerHTML = '';
+  #|   box.style.display = 'flex';
+  #|   const glyphs = isWhite ? ['♕', '♖', '♗', '♘'] : ['♛', '♜', '♝', '♞'];
+  #|   glyphs.forEach((ch, i) => {
+  #|     const b = document.createElement('button');
+  #|     b.className = 'promo';
+  #|     b.textContent = ch;
+  #|     b.addEventListener('click', () => { box.style.display = 'none'; cb(i); });
+  #|     box.appendChild(b);
+  #|   });
+  #| }
+
+///|
+/// Hide the promotion picker.
+pub extern "js" fn js_hide_promotion() -> Unit =
+  #| function() {
+  #|   const box = document.getElementById('promotion');
+  #|   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  #| }
+
+///|
+/// The `fen` query parameter, or an empty string (lets a position be shared).
+pub extern "js" fn js_initial_fen() -> String =
+  #| function() {
+  #|   const p = new URLSearchParams(location.search);
+  #|   return p.get('fen') || '';
+  #| }

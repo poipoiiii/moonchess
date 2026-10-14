@@ -7,12 +7,14 @@
 ///|
 /// Mutable application state.
 struct App {
-  game : @lib.Chess
+  mut game : @lib.Chess
   mut selected : Int
   mut last_from : Int
   mut last_to : Int
   mut animate : Bool
   mut busy : Bool
+  mut pending_from : Int
+  mut pending_to : Int
 }
 
 ///|
@@ -23,6 +25,8 @@ let app : App = {
   last_to: -1,
   animate: false,
   busy: false,
+  pending_from: -1,
+  pending_to: -1,
 }
 
 ///|
@@ -88,6 +92,8 @@ fn render() -> Unit {
     app.last_to,
     app.animate,
   )
+  let (by_white, by_black) = g.captured_glyphs()
+  js_set_captured(by_white, by_black)
 }
 
 ///|
@@ -147,8 +153,17 @@ fn on_cell(row : Int, col : Int) -> Unit {
     return
   }
   let from = app.selected
-  let promo = g.promotion_piece(from, sq)
-  match g.play(@lib.square_name(from), @lib.square_name(sq), promo) {
+  // A pawn reaching the last rank: ask the player which piece to promote to.
+  if g.promotion_piece(from, sq) is Some(_) {
+    app.pending_from = from
+    app.pending_to = sq
+    app.selected = -1
+    app.busy = true
+    render()
+    js_show_promotion(g.side_is_white(), on_promotion_pick)
+    return
+  }
+  match g.play(@lib.square_name(from), @lib.square_name(sq), None) {
     Some(m) => {
       app.selected = -1
       app.busy = true
@@ -165,6 +180,37 @@ fn on_cell(row : Int, col : Int) -> Unit {
 }
 
 ///|
+/// Apply the promotion the player picked (0 = queen, 1 = rook, 2 = bishop,
+/// 3 = knight).
+fn on_promotion_pick(index : Int) -> Unit {
+  let g = app.game
+  let from = app.pending_from
+  let to = app.pending_to
+  js_hide_promotion()
+  if from < 0 || to < 0 {
+    app.busy = false
+    render()
+    return
+  }
+  let promo = @lib.promotion_from_index(index)
+  match g.play(@lib.square_name(from), @lib.square_name(to), Some(promo)) {
+    Some(m) => {
+      app.pending_from = -1
+      app.pending_to = -1
+      render_move(m)
+      js_defer(engine_reply, 220)
+    }
+    None => {
+      app.pending_from = -1
+      app.pending_to = -1
+      app.busy = false
+      app.animate = false
+      render()
+    }
+  }
+}
+
+///|
 /// Start a fresh game.
 fn on_new_game() -> Unit {
   app.game.reset()
@@ -173,6 +219,9 @@ fn on_new_game() -> Unit {
   app.last_to = -1
   app.animate = false
   app.busy = false
+  app.pending_from = -1
+  app.pending_to = -1
+  js_hide_promotion()
   render()
 }
 
@@ -187,6 +236,9 @@ fn on_undo() -> Unit {
   app.last_to = -1
   app.animate = false
   app.busy = false
+  app.pending_from = -1
+  app.pending_to = -1
+  js_hide_promotion()
   render()
 }
 
@@ -197,5 +249,13 @@ fn main {
   js_set_on_new(on_new_game)
   js_set_on_undo(on_undo)
   js_bind_buttons()
+  // Allow sharing a position via ?fen=...
+  let fen = js_initial_fen()
+  if fen != "" {
+    match @lib.Chess::from_fen(fen) {
+      Some(loaded) => app.game = loaded
+      None => ()
+    }
+  }
   render()
 }

@@ -565,6 +565,18 @@ pub fn Chess::promotion_piece(
 }
 
 ///|
+/// Promotion piece for a UI choice index: 0 = queen, 1 = rook, 2 = bishop,
+/// 3 = knight.
+pub fn promotion_from_index(index : Int) -> PieceType {
+  match index {
+    1 => Rook
+    2 => Bishop
+    3 => Knight
+    _ => Queen
+  }
+}
+
+///|
 /// Undo the most recent move.
 pub fn Chess::undo(self : Chess) -> Move? {
   self.undo_move()

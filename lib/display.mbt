@@ -56,3 +56,24 @@ pub fn Chess::display(self : Chess, unicode? : Bool = true) -> String {
   }
   out + "  a b c d e f g h\n"
 }
+
+///|
+/// Unicode glyphs of the pieces captured by White and by Black, in move order.
+pub fn Chess::captured_glyphs(self : Chess) -> (String, String) {
+  let mut by_white = ""
+  let mut by_black = ""
+  for entry in self.history {
+    match entry.mv.captured {
+      Some(kind) => {
+        let glyph = piece_symbol({ kind, color: entry.mv.color.opponent(), })
+        if entry.mv.color == White {
+          by_white = by_white + glyph
+        } else {
+          by_black = by_black + glyph
+        }
+      }
+      None => ()
+    }
+  }
+  (by_white, by_black)
+}

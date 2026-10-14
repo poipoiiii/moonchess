@@ -52,6 +52,8 @@ pub fn parse_square(String) -> Int?
 
 pub fn piece_at(Array[Piece?], Int) -> Piece?
 
+pub fn promotion_from_index(Int) -> PieceType
+
 pub fn rank_letter(Int) -> String
 
 pub fn rank_of(Int) -> Int
@@ -85,6 +87,7 @@ pub fn Chess::best_move(Self, Int) -> Move?
 pub fn Chess::best_move_scored(Self, Int) -> (Move?, Int)
 pub fn Chess::board(Self) -> Array[Array[Piece?]]
 pub fn Chess::book_move(Self) -> Move?
+pub fn Chess::captured_glyphs(Self) -> (String, String)
 pub fn Chess::clear(Self) -> Unit
 pub fn Chess::display(Self, unicode? : Bool) -> String
 pub fn Chess::evaluate(Self) -> Int

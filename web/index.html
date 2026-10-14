@@ -90,6 +90,28 @@
         box-sizing: border-box;
       }
 
+      /* Captured pieces and promotion */
+      #captured {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 480px;
+        font-size: 22px;
+      }
+      .caprow { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+      .caplabel { font-size: 13px; opacity: .7; width: 44px; }
+      .capglyphs { letter-spacing: 1px; line-height: 1; }
+      #promotion { gap: 8px; }
+      .promo {
+        font-size: 28px;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       #status {
         font-size: 15px;
         min-height: 22px;
@@ -113,6 +135,15 @@
       <div id="board"></div>
       <div id="pieces"></div>
     </div>
+    <div id="captured">
+      <div class="caprow">
+        <span class="caplabel">白方吃</span><span id="capWhite" class="capglyphs"></span>
+      </div>
+      <div class="caprow">
+        <span class="caplabel">黑方吃</span><span id="capBlack" class="capglyphs"></span>
+      </div>
+    </div>
+    <div id="promotion" style="display: none"></div>
     <div id="toolbar">
       <button id="newGame">新对局</button>
       <button id="undo">悔棋</button>

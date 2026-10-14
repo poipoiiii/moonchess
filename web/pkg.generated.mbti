@@ -10,13 +10,21 @@ pub fn js_dom_init() -> Unit
 
 pub fn js_engine_depth() -> Int
 
+pub fn js_hide_promotion() -> Unit
+
+pub fn js_initial_fen() -> String
+
 pub fn js_render(String, String, Int, String, Int, Int, Bool) -> Unit
+
+pub fn js_set_captured(String, String) -> Unit
 
 pub fn js_set_on_cell((Int, Int) -> Unit) -> Unit
 
 pub fn js_set_on_new(() -> Unit) -> Unit
 
 pub fn js_set_on_undo(() -> Unit) -> Unit
+
+pub fn js_show_promotion(Bool, (Int) -> Unit) -> Unit
 
 // Errors
 

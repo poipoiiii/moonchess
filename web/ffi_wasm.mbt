@@ -48,3 +48,23 @@ pub fn js_engine_depth() -> Int {
 pub fn js_defer(cb : () -> Unit, ms : Int) -> Unit {
   ignore((cb, ms))
 }
+
+///|
+pub fn js_set_captured(by_white : String, by_black : String) -> Unit {
+  ignore((by_white, by_black))
+}
+
+///|
+pub fn js_show_promotion(is_white : Bool, cb : (Int) -> Unit) -> Unit {
+  ignore((is_white, cb))
+}
+
+///|
+pub fn js_hide_promotion() -> Unit {
+  ()
+}
+
+///|
+pub fn js_initial_fen() -> String {
+  ""
+}
