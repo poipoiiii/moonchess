@@ -7,19 +7,19 @@
 
 ///|
 /// Build a 0x88 square from file and rank (both `0..7`).
-pub fn make_square(file : Int, rank : Int) -> Square {
+pub fn make_square(file : Int32, rank : Int32) -> Square {
   rank * 16 + file
 }
 
 ///|
 /// File (column) of a square, `0` = `'a'`.
-pub fn file_of(sq : Square) -> Int {
+pub fn file_of(sq : Square) -> Int32 {
   sq & 0x7
 }
 
 ///|
 /// Rank (row) of a square, `0` = rank 1.
-pub fn rank_of(sq : Square) -> Int {
+pub fn rank_of(sq : Square) -> Int32 {
   sq >> 4
 }
 

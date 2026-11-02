@@ -13,7 +13,7 @@ fn splitmix64(state : UInt64) -> (UInt64, UInt64) {
 
 ///|
 /// Fill `count` deterministic pseudo-random keys starting from `state`.
-fn make_keys(count : Int, state : UInt64) -> Array[UInt64] {
+fn make_keys(count : Int32, state : UInt64) -> Array[UInt64] {
   let out : Array[UInt64] = []
   let mut s = state
   let mut i = 0
@@ -71,58 +71,58 @@ pub fn Chess::hash(self : Chess) -> UInt64 {
 
 ///|
 /// Number of transposition-table slots (a power of two).
-let tt_bits : Int = 16
+let tt_bits : Int32 = 16
 
 ///|
-let tt_size : Int = 1 << tt_bits
+let tt_size : Int32 = 1 << tt_bits
 
 ///|
 let tt_size_u : UInt64 = 65536UL
 
 ///|
 /// Bound type stored in a transposition-table entry.
-let flag_exact : Int = 0
+let flag_exact : Int32 = 0
 
 ///|
-let flag_lower : Int = 1
+let flag_lower : Int32 = 1
 
 ///|
-let flag_upper : Int = 2
+let flag_upper : Int32 = 2
 
 ///|
 /// One transposition-table slot.
 struct TTEntry {
   key : UInt64
-  depth : Int
-  score : Int
-  flag : Int
-  best_from : Int
+  depth : Int32
+  score : Int32
+  flag : Int32
+  best_from : Int32
 }
 
 ///|
 /// Maximum number of plies tracked by killer-move slots.
-let max_ply : Int = 64
+let max_ply : Int32 = 64
 
 ///|
 /// Size of the history table (`128 * 128` move codes).
-let history_size : Int = 16384
+let history_size : Int32 = 16384
 
 ///|
 /// A search engine with a transposition table, killer moves and history.
 pub struct Searcher {
   tt : Array[TTEntry]
-  killers : Array[Int]
-  history : Array[Int]
-  mut nodes : Int
+  killers : Array[Int32]
+  history : Array[Int32]
+  mut nodes : Int32
 }
 
 ///|
 /// Result of a search.
 pub struct SearchResult {
   best : Move?
-  score : Int
-  depth : Int
-  nodes : Int
+  score : Int32
+  depth : Int32
+  nodes : Int32
 }
 
 ///|
@@ -148,9 +148,9 @@ pub fn Searcher::new() -> Searcher {
 fn Searcher::score_move(
   self : Searcher,
   m : Move,
-  tt_from : Int,
-  ply : Int,
-) -> Int {
+  tt_from : Int32,
+  ply : Int32,
+) -> Int32 {
   let mut score = move_score(m)
   if m.from == tt_from {
     score = score + 100000
@@ -169,8 +169,8 @@ fn Searcher::score_move(
 fn Searcher::record_cutoff(
   self : Searcher,
   m : Move,
-  ply : Int,
-  depth : Int,
+  ply : Int32,
+  depth : Int32,
 ) -> Unit {
   if m.captured is Some(_) || ply >= max_ply {
     return
@@ -188,8 +188,8 @@ fn Searcher::record_cutoff(
 fn Searcher::order_moves(
   self : Searcher,
   moves : Array[Move],
-  tt_from : Int,
-  ply : Int,
+  tt_from : Int32,
+  ply : Int32,
 ) -> Array[Move] {
   let result = moves.copy()
   let n = result.length()
@@ -224,10 +224,10 @@ fn Searcher::probe(self : Searcher, key : UInt64) -> TTEntry? {
 fn Searcher::store(
   self : Searcher,
   key : UInt64,
-  depth : Int,
-  score : Int,
-  flag : Int,
-  best_from : Int,
+  depth : Int32,
+  score : Int32,
+  flag : Int32,
+  best_from : Int32,
 ) -> Unit {
   let index = (key % tt_size_u).to_int()
   self.tt[index] = { key, depth, score, flag, best_from, }
@@ -238,11 +238,11 @@ fn Searcher::store(
 fn Searcher::negamax(
   self : Searcher,
   game : Chess,
-  depth : Int,
-  alpha : Int,
-  beta : Int,
-  ply : Int,
-) -> Int {
+  depth : Int32,
+  alpha : Int32,
+  beta : Int32,
+  ply : Int32,
+) -> Int32 {
   self.nodes = self.nodes + 1
   let moves = game.legal_moves_raw()
   if moves.length() == 0 {
@@ -308,13 +308,13 @@ fn Searcher::negamax(
 
 ///|
 /// Current time in milliseconds.
-fn now_ms() -> Int {
+fn now_ms() -> Int32 {
   @env.now().to_int()
 }
 
 ///|
 /// Whether the optional deadline has passed.
-fn timer_expired(deadline : Int?) -> Bool {
+fn timer_expired(deadline : Int32?) -> Bool {
   match deadline {
     Some(d) => now_ms() >= d
     None => false
@@ -326,8 +326,8 @@ fn timer_expired(deadline : Int?) -> Bool {
 fn Searcher::iterative(
   self : Searcher,
   game : Chess,
-  max_depth : Int,
-  deadline : Int?,
+  max_depth : Int32,
+  deadline : Int32?,
 ) -> SearchResult {
   let root_moves = game.moves()
   if root_moves.length() == 0 {
@@ -383,7 +383,7 @@ fn Searcher::iterative(
 pub fn Searcher::search(
   self : Searcher,
   game : Chess,
-  max_depth : Int,
+  max_depth : Int32,
 ) -> SearchResult {
   self.iterative(game, max_depth, None)
 }
@@ -393,8 +393,8 @@ pub fn Searcher::search(
 pub fn Searcher::search_timed(
   self : Searcher,
   game : Chess,
-  max_depth : Int,
-  time_ms : Int,
+  max_depth : Int32,
+  time_ms : Int32,
 ) -> SearchResult {
   self.iterative(game, max_depth, Some(now_ms() + time_ms))
 }

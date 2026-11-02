@@ -50,6 +50,22 @@ moonchess/
 
 ## 快速开始
 
+### 安装
+
+已发布到 [mooncakes.io](https://mooncakes.io)：
+
+```bash
+moon add poipoiiii/moonchess
+```
+
+然后在 `moon.pkg` 中引入核心库：
+
+```
+import {
+  "poipoiiii/moonchess/lib" as @lib
+}
+```
+
 ### 构建与测试
 
 ```bash

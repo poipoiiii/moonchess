@@ -2,7 +2,7 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/) 风格。
 
-## [Unreleased]
+## [0.1.0] - 2026-11-02
 
 ### Added
 - 基于 0x88 的棋盘表示与攻击检测。

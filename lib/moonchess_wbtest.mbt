@@ -5,7 +5,7 @@
 
 ///|
 /// Recursive perft using the SAN-generating move list (reference path).
-fn perft_ref(game : Chess, depth : Int) -> Int {
+fn perft_ref(game : Chess, depth : Int32) -> Int32 {
   if depth == 0 {
     return 1
   }

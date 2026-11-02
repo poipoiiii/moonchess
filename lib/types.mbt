@@ -6,7 +6,7 @@
 
 ///|
 /// Board square index in 0x88 form (see `square.mbt`).
-pub type Square = Int
+pub type Square = Int32
 
 ///|
 /// Side to move and piece color.
@@ -14,6 +14,12 @@ pub enum Color {
   White
   Black
 } derive(Eq, Debug)
+
+///|
+pub extend Color with Eq::{not_equal, equal}
+
+///|
+pub extend Color with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 /// The opposite color.
@@ -35,7 +41,7 @@ pub fn Color::to_char(self : Color) -> Char {
 
 ///|
 /// `0` for white, `1` for black.
-pub fn Color::index(self : Color) -> Int {
+pub fn Color::index(self : Color) -> Int32 {
   match self {
     White => 0
     Black => 1
@@ -54,8 +60,14 @@ pub enum PieceType {
 } derive(Eq, Debug)
 
 ///|
+pub extend PieceType with Eq::{not_equal, equal}
+
+///|
+pub extend PieceType with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 /// `0..5` index for the piece kind (pawn = 0).
-pub fn PieceType::index(self : PieceType) -> Int {
+pub fn PieceType::index(self : PieceType) -> Int32 {
   match self {
     Pawn => 0
     Knight => 1
@@ -101,6 +113,12 @@ pub struct Piece {
 } derive(Eq, Debug)
 
 ///|
+pub extend Piece with Eq::{not_equal, equal}
+
+///|
+pub extend Piece with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
 /// Construct a piece.
 pub fn Piece::new(kind : PieceType, color : Color) -> Piece {
   { kind, color, }
@@ -125,16 +143,16 @@ pub fn Piece::fen_char(self : Piece) -> Char {
 
 ///|
 /// Castling-rights bit flags.
-pub let castle_white_king : Int = 1
+pub let castle_white_king : Int32 = 1
 
 ///|
-pub let castle_white_queen : Int = 2
+pub let castle_white_queen : Int32 = 2
 
 ///|
-pub let castle_black_king : Int = 4
+pub let castle_black_king : Int32 = 4
 
 ///|
-pub let castle_black_queen : Int = 8
+pub let castle_black_queen : Int32 = 8
 
 ///|
 /// A fully described chess move.

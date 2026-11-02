@@ -2,7 +2,7 @@
 
 ///|
 /// File letter for a file index `0..7`.
-pub fn file_letter(file : Int) -> String {
+pub fn file_letter(file : Int32) -> String {
   match "abcdefgh".get_char(file) {
     Some(c) => c.to_string()
     None => "?"
@@ -11,7 +11,7 @@ pub fn file_letter(file : Int) -> String {
 
 ///|
 /// Rank digit for a rank index `0..7`.
-pub fn rank_letter(rank : Int) -> String {
+pub fn rank_letter(rank : Int32) -> String {
   match "12345678".get_char(rank) {
     Some(c) => c.to_string()
     None => "?"
@@ -82,7 +82,7 @@ fn Chess::gen_step_moves(
   moves : Array[Move],
   from : Square,
   us : Color,
-  offsets : Array[Int],
+  offsets : Array[Int32],
 ) -> Unit {
   let kind = match self.board[from] {
     Some(p) => p.kind
@@ -109,7 +109,7 @@ fn Chess::gen_slide_moves(
   moves : Array[Move],
   from : Square,
   us : Color,
-  offsets : Array[Int],
+  offsets : Array[Int32],
 ) -> Unit {
   let kind = match self.board[from] {
     Some(p) => p.kind
@@ -177,7 +177,7 @@ fn Chess::gen_pawn_moves(
     }
   }
   // Diagonal captures (including en passant).
-  let caps : Array[Int] = [from + dir - 1, from + dir + 1]
+  let caps : Array[Int32] = [from + dir - 1, from + dir + 1]
   for to in caps {
     if on_board(to) {
       match self.board[to] {
@@ -232,9 +232,9 @@ fn Chess::gen_castling_moves(
 /// king and the castling rook themselves.
 fn Chess::castle_path_clear(
   self : Chess,
-  a : Int,
-  b : Int,
-  back : Int,
+  a : Int32,
+  b : Int32,
+  back : Int32,
   king_sq : Square,
   rook_sq : Square,
 ) -> Bool {
@@ -261,7 +261,7 @@ fn Chess::try_castle(
   moves : Array[Move],
   from : Square,
   us : Color,
-  back : Int,
+  back : Int32,
   kingside : Bool,
 ) -> Unit {
   let index = castle_index(us, kingside)
@@ -314,7 +314,7 @@ fn Chess::try_castle(
 
 ///|
 /// Smaller of two integers.
-fn lo_of(a : Int, b : Int) -> Int {
+fn lo_of(a : Int32, b : Int32) -> Int32 {
   if a < b {
     a
   } else {
@@ -324,7 +324,7 @@ fn lo_of(a : Int, b : Int) -> Int {
 
 ///|
 /// Larger of two integers.
-fn hi_of(a : Int, b : Int) -> Int {
+fn hi_of(a : Int32, b : Int32) -> Int32 {
   if a < b {
     b
   } else {
@@ -444,7 +444,7 @@ pub fn Chess::moves(self : Chess) -> Array[Move] {
 
 ///|
 /// Count leaf nodes of the legal move tree to a given depth (perft).
-pub fn Chess::perft(self : Chess, depth : Int) -> Int {
+pub fn Chess::perft(self : Chess, depth : Int32) -> Int32 {
   let moves = self.legal_moves_raw()
   if depth <= 1 {
     return moves.length()
@@ -460,9 +460,12 @@ pub fn Chess::perft(self : Chess, depth : Int) -> Int {
 
 ///|
 /// Perft split by each legal root move, returned as `(SAN, node count)`.
-pub fn Chess::perft_divide(self : Chess, depth : Int) -> Array[(String, Int)] {
+pub fn Chess::perft_divide(
+  self : Chess,
+  depth : Int32,
+) -> Array[(String, Int32)] {
   let moves = self.moves()
-  let out : Array[(String, Int)] = []
+  let out : Array[(String, Int32)] = []
   for m in moves {
     self.make_move(m)
     let nodes = if depth <= 1 { 1 } else { self.perft(depth - 1) }
@@ -567,7 +570,7 @@ pub fn Chess::promotion_piece(
 ///|
 /// Promotion piece for a UI choice index: 0 = queen, 1 = rook, 2 = bishop,
 /// 3 = knight.
-pub fn promotion_from_index(index : Int) -> PieceType {
+pub fn promotion_from_index(index : Int32) -> PieceType {
   match index {
     1 => Rook
     2 => Bishop

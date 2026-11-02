@@ -19,7 +19,7 @@ let pgn_roster : Array[(String, String)] = [
 
 ///|
 /// Character at `index`, or NUL when out of range.
-fn char_at(s : String, index : Int) -> Char {
+fn char_at(s : String, index : Int32) -> Char {
   match s.get_char(index) {
     Some(c) => c
     None => '\u{0}'
@@ -28,7 +28,7 @@ fn char_at(s : String, index : Int) -> Char {
 
 ///|
 /// Substring `s[start:end]` built by concatenating characters.
-fn slice_string(s : String, start : Int, end : Int) -> String {
+fn slice_string(s : String, start : Int32, end : Int32) -> String {
   let chars = s.to_array()
   let mut out = ""
   let mut i = if start < 0 { 0 } else { start }
@@ -138,7 +138,7 @@ fn Chess::apply_san(self : Chess, san : String) -> Bool {
 
 ///|
 /// Render the move text (with move numbers and line wrapping).
-fn Chess::pgn_moves(self : Chess, max_width : Int) -> String {
+fn Chess::pgn_moves(self : Chess, max_width : Int32) -> String {
   let moves = self.history()
   let mut text = ""
   let mut line = ""
@@ -168,7 +168,7 @@ fn Chess::pgn_moves(self : Chess, max_width : Int) -> String {
 
 ///|
 /// Export the game as PGN.
-pub fn Chess::pgn(self : Chess, max_width? : Int = 80) -> String {
+pub fn Chess::pgn(self : Chess, max_width~ : Int32 = 80) -> String {
   let mut header = ""
   let seen : Array[String] = []
   for pair in pgn_roster {

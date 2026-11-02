@@ -33,7 +33,7 @@ fn piece_letter(p : Piece) -> String {
 ///|
 /// Render the board as text. When `unicode` is true, chess symbols are used;
 /// otherwise plain letters (`KQRBNP` / `kqrbnp`) are printed.
-pub fn Chess::display(self : Chess, unicode? : Bool = true) -> String {
+pub fn Chess::display(self : Chess, unicode~ : Bool = true) -> String {
   let mut out = ""
   let mut rank = 7
   while rank >= 0 {

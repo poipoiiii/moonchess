@@ -2,7 +2,7 @@
 
 ///|
 /// Parse a small non-negative integer, falling back on invalid input.
-fn parse_int_arg(s : String, fallback : Int) -> Int {
+fn parse_int_arg(s : String, fallback : Int32) -> Int32 {
   if s.length() == 0 {
     return fallback
   }
@@ -19,7 +19,7 @@ fn parse_int_arg(s : String, fallback : Int) -> Int {
 
 ///|
 /// Build a game from the optional FEN argument at `index`.
-fn game_from(args : Array[String], index : Int) -> @lib.Chess {
+fn game_from(args : Array[String], index : Int32) -> @lib.Chess {
   if args.length() > index {
     match @lib.Chess::from_fen(args[index]) {
       Some(game) => game
@@ -36,7 +36,7 @@ fn game_from(args : Array[String], index : Int) -> @lib.Chess {
 ///|
 /// Play a self-play game, printing one SAN move per line.
 /// Uses the opening book for the first few plies, then the engine.
-fn selfplay(depth : Int, max_plies : Int) -> Unit {
+fn selfplay(depth : Int32, max_plies : Int32) -> Unit {
   let game = @lib.Chess::new()
   let mut played = 0
   while played < max_plies && !game.is_game_over() {

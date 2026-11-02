@@ -71,6 +71,6 @@ pub fn Chess::book_move(self : Chess) -> Move? {
 
 ///|
 /// Number of opening lines in the book.
-pub fn book_size() -> Int {
+pub fn book_size() -> Int32 {
   opening_lines.length()
 }

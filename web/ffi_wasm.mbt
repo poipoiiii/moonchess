@@ -7,7 +7,7 @@ pub fn js_dom_init() -> Unit {
 }
 
 ///|
-pub fn js_set_on_cell(cb : (Int, Int) -> Unit) -> Unit {
+pub fn js_set_on_cell(cb : (Int32, Int32) -> Unit) -> Unit {
   ignore(cb)
 }
 
@@ -30,22 +30,22 @@ pub fn js_bind_buttons() -> Unit {
 pub fn js_render(
   cells : String,
   status : String,
-  selected : Int,
+  selected : Int32,
   targets : String,
-  from : Int,
-  to : Int,
+  from : Int32,
+  to : Int32,
   animate : Bool,
 ) -> Unit {
   ignore((cells, status, selected, targets, from, to, animate))
 }
 
 ///|
-pub fn js_engine_depth() -> Int {
+pub fn js_engine_depth() -> Int32 {
   3
 }
 
 ///|
-pub fn js_defer(cb : () -> Unit, ms : Int) -> Unit {
+pub fn js_defer(cb : () -> Unit, ms : Int32) -> Unit {
   ignore((cb, ms))
 }
 
@@ -55,7 +55,7 @@ pub fn js_set_captured(by_white : String, by_black : String) -> Unit {
 }
 
 ///|
-pub fn js_show_promotion(is_white : Bool, cb : (Int) -> Unit) -> Unit {
+pub fn js_show_promotion(is_white : Bool, cb : (Int32) -> Unit) -> Unit {
   ignore((is_white, cb))
 }
 

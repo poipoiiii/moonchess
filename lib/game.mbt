@@ -5,15 +5,15 @@
 /// Castling bit masks used to clear individual rights, indexed by right
 /// (0 = White king-side, 1 = White queen-side, 2 = Black king-side,
 /// 3 = Black queen-side).
-let mask_keep : Array[Int] = [14, 13, 11, 7]
+let mask_keep : Array[Int32] = [14, 13, 11, 7]
 
 ///|
 /// Castling-right bits, in the same index order as `mask_keep`.
-let castle_bits : Array[Int] = [1, 2, 4, 8]
+let castle_bits : Array[Int32] = [1, 2, 4, 8]
 
 ///|
 /// Back rank of each castling right's owner.
-let castle_back_rank : Array[Int] = [0, 0, 7, 7]
+let castle_back_rank : Array[Int32] = [0, 0, 7, 7]
 
 ///|
 /// The standard opening position in FEN.
@@ -23,10 +23,10 @@ pub let start_fen : String = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq
 /// One entry of the internal undo stack.
 struct HistoryEntry {
   mv : Move
-  castling : Int
+  castling : Int32
   ep : Square?
-  half_moves : Int
-  move_number : Int
+  half_moves : Int32
+  move_number : Int32
   captured : Piece?
   captured_square : Square
 }
@@ -36,14 +36,14 @@ struct HistoryEntry {
 pub struct Chess {
   mut board : Array[Piece?]
   mut turn : Color
-  mut castling : Int
+  mut castling : Int32
   /// Start files of the king-side / queen-side rooks for each castling right
   /// (index order as `castle_bits`), or -1. Fixed for the whole game so that
   /// `undo` can always find the rook (Chess960).
-  mut castle_rook : Array[Int]
+  mut castle_rook : Array[Int32]
   mut ep : Square?
-  mut half_moves : Int
-  mut move_number : Int
+  mut half_moves : Int32
+  mut move_number : Int32
   history : Array[HistoryEntry]
   positions : Array[String]
   mut headers : Array[(String, String)]
@@ -52,7 +52,7 @@ pub struct Chess {
 ///|
 /// Index of a castling right (0 = White king-side, 1 = White queen-side,
 /// 2 = Black king-side, 3 = Black queen-side).
-fn castle_index(color : Color, kingside : Bool) -> Int {
+fn castle_index(color : Color, kingside : Bool) -> Int32 {
   match color {
     White => if kingside { 0 } else { 1 }
     Black => if kingside { 2 } else { 3 }
@@ -61,7 +61,7 @@ fn castle_index(color : Color, kingside : Bool) -> Int {
 
 ///|
 /// File of `color`'s king on its back rank, or -1.
-fn Chess::king_file_on_back_rank(self : Chess, color : Color) -> Int {
+fn Chess::king_file_on_back_rank(self : Chess, color : Color) -> Int32 {
   let back = if color == White { 0 } else { 7 }
   let mut f = 0
   while f < 8 {
@@ -80,7 +80,7 @@ fn Chess::resolve_castle_rook(
   self : Chess,
   color : Color,
   kingside : Bool,
-) -> Int {
+) -> Int32 {
   let king_file = self.king_file_on_back_rank(color)
   if king_file < 0 {
     return -1
@@ -113,7 +113,7 @@ fn Chess::set_castle_right(
   self : Chess,
   color : Color,
   kingside : Bool,
-  file : Int,
+  file : Int32,
 ) -> Unit {
   if file >= 0 {
     let index = castle_index(color, kingside)
@@ -126,7 +126,7 @@ fn Chess::set_castle_right(
 /// Castling letter for a rook file: `K`/`Q`/`k`/`q` when the rook sits on the
 /// standard outer file, otherwise the file letter (upper case for White,
 /// lower case for Black) as used by X-FEN / Shredder-FEN.
-fn castle_char(file : Int, color : Color, kingside : Bool) -> String {
+fn castle_char(file : Int32, color : Color, kingside : Bool) -> String {
   let standard = if kingside { 7 } else { 0 }
   if file == standard {
     match (color, kingside) {
@@ -143,7 +143,7 @@ fn castle_char(file : Int, color : Color, kingside : Bool) -> String {
 
 ///|
 /// Absolute difference of two integers.
-fn abs_int(a : Int, b : Int) -> Int {
+fn abs_int(a : Int32, b : Int32) -> Int32 {
   if a > b {
     a - b
   } else {
@@ -153,7 +153,7 @@ fn abs_int(a : Int, b : Int) -> Int {
 
 ///|
 /// Parse a non-negative decimal integer, or `None`.
-fn parse_uint(s : String) -> Int? {
+fn parse_uint(s : String) -> Int32? {
   if s.length() == 0 {
     return None
   }
@@ -434,7 +434,11 @@ fn Chess::position_key(self : Chess) -> String {
 
 ///|
 /// Clear castling rights whose rook home square was vacated or captured.
-fn Chess::clear_castling_for(self : Chess, rights : Int, sq : Square) -> Int {
+fn Chess::clear_castling_for(
+  self : Chess,
+  rights : Int32,
+  sq : Square,
+) -> Int32 {
   let mut result = rights
   let mut i = 0
   while i < 4 {
@@ -668,7 +672,7 @@ pub fn Chess::is_check(self : Chess) -> Bool {
 
 ///|
 /// The undo stack size (number of moves played).
-pub fn Chess::move_count(self : Chess) -> Int {
+pub fn Chess::move_count(self : Chess) -> Int32 {
   self.history.length()
 }
 

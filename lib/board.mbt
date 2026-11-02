@@ -5,19 +5,19 @@
 
 ///|
 /// Knight move offsets in 0x88.
-pub let knight_offsets : Array[Int] = [-18, -33, -31, -14, 18, 33, 31, 14]
+pub let knight_offsets : Array[Int32] = [-18, -33, -31, -14, 18, 33, 31, 14]
 
 ///|
 /// Diagonal sliding offsets.
-pub let bishop_offsets : Array[Int] = [-17, -15, 17, 15]
+pub let bishop_offsets : Array[Int32] = [-17, -15, 17, 15]
 
 ///|
 /// Orthogonal sliding offsets.
-pub let rook_offsets : Array[Int] = [-16, -1, 1, 16]
+pub let rook_offsets : Array[Int32] = [-16, -1, 1, 16]
 
 ///|
 /// King / single-step offsets.
-pub let king_offsets : Array[Int] = [-17, -16, -15, -1, 1, 15, 16, 17]
+pub let king_offsets : Array[Int32] = [-17, -16, -15, -1, 1, 15, 16, 17]
 
 ///|
 /// A fresh, empty board.

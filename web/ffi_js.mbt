@@ -30,7 +30,7 @@ pub extern "js" fn js_dom_init() -> Unit =
 
 ///|
 /// Register the cell-click callback.
-pub extern "js" fn js_set_on_cell(cb : (Int, Int) -> Unit) -> Unit =
+pub extern "js" fn js_set_on_cell(cb : (Int32, Int32) -> Unit) -> Unit =
   #| function(cb) { (globalThis.__mc = globalThis.__mc || {}).onCellClick = cb; }
 
 ///|
@@ -66,10 +66,10 @@ pub extern "js" fn js_bind_buttons() -> Unit =
 pub extern "js" fn js_render(
   cells : String,
   status : String,
-  selected : Int,
+  selected : Int32,
   targets : String,
-  from : Int,
-  to : Int,
+  from : Int32,
+  to : Int32,
   animate : Bool,
 ) -> Unit =
   #| function(cells, status, selected, targets, from, to, animate) {
@@ -114,7 +114,7 @@ pub extern "js" fn js_render(
 
 ///|
 /// Read the engine strength selected in the toolbar.
-pub extern "js" fn js_engine_depth() -> Int =
+pub extern "js" fn js_engine_depth() -> Int32 =
   #| function() {
   #|   const el = document.getElementById('depth');
   #|   const v = el ? parseInt(el.value, 10) : 3;
@@ -124,7 +124,7 @@ pub extern "js" fn js_engine_depth() -> Int =
 ///|
 /// Defer `cb` by `ms` milliseconds (used to let the move animation finish
 /// before the engine replies).
-pub extern "js" fn js_defer(cb : () -> Unit, ms : Int) -> Unit =
+pub extern "js" fn js_defer(cb : () -> Unit, ms : Int32) -> Unit =
   #| function(cb, ms) { setTimeout(cb, ms); }
 
 ///|
@@ -145,7 +145,7 @@ pub extern "js" fn js_set_captured(
 /// 3 = knight.
 pub extern "js" fn js_show_promotion(
   is_white : Bool,
-  cb : (Int) -> Unit,
+  cb : (Int32) -> Unit,
 ) -> Unit =
   #| function(isWhite, cb) {
   #|   const box = document.getElementById('promotion');

@@ -8,13 +8,13 @@
 /// Mutable application state.
 struct App {
   mut game : @lib.Chess
-  mut selected : Int
-  mut last_from : Int
-  mut last_to : Int
+  mut selected : Int32
+  mut last_from : Int32
+  mut last_to : Int32
   mut animate : Bool
   mut busy : Bool
-  mut pending_from : Int
-  mut pending_to : Int
+  mut pending_from : Int32
+  mut pending_to : Int32
 }
 
 ///|
@@ -50,7 +50,7 @@ fn status_text(g : @lib.Chess) -> String {
 
 ///|
 /// Comma-separated destination squares for the selected piece.
-fn targets_for(g : @lib.Chess, from : Int) -> String {
+fn targets_for(g : @lib.Chess, from : Int32) -> String {
   if from < 0 {
     return ""
   }
@@ -133,7 +133,7 @@ fn engine_reply() -> Unit {
 
 ///|
 /// Handle a click on board cell `(row, col)` where row 0 is rank 8.
-fn on_cell(row : Int, col : Int) -> Unit {
+fn on_cell(row : Int32, col : Int32) -> Unit {
   let g = app.game
   if app.busy || g.is_game_over() {
     return
@@ -182,7 +182,7 @@ fn on_cell(row : Int, col : Int) -> Unit {
 ///|
 /// Apply the promotion the player picked (0 = queen, 1 = rook, 2 = bishop,
 /// 3 = knight).
-fn on_promotion_pick(index : Int) -> Unit {
+fn on_promotion_pick(index : Int32) -> Unit {
   let g = app.game
   let from = app.pending_from
   let to = app.pending_to

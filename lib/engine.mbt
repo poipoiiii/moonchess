@@ -3,7 +3,7 @@
 
 ///|
 /// Value of each piece kind in centipawns.
-pub fn material_value(kind : PieceType) -> Int {
+pub fn material_value(kind : PieceType) -> Int32 {
   match kind {
     Pawn => 100
     Knight => 320
@@ -16,15 +16,15 @@ pub fn material_value(kind : PieceType) -> Int {
 
 ///|
 /// Score used for a checkmate in `negamax`.
-let mate_score : Int = 1_000_000
+let mate_score : Int32 = 1_000_000
 
 ///|
 /// A large "infinity" bound.
-let infinity : Int = 1_000_000_000
+let infinity : Int32 = 1_000_000_000
 
 ///|
 /// Pawn piece-square table (from rank 8 down to rank 1).
-let pawn_table : Array[Int] = [
+let pawn_table : Array[Int32] = [
   0, 0, 0, 0, 0, 0, 0, 0, 50, 50, 50, 50, 50, 50, 50, 50, 10, 10, 20, 30, 30, 20,
   10, 10, 5, 5, 10, 25, 25, 10, 5, 5, 0, 0, 0, 20, 20, 0, 0, 0, 5, -5, -10, 0, 0,
   -10, -5, 5, 5, 10, 10, -20, -20, 10, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -32,7 +32,7 @@ let pawn_table : Array[Int] = [
 
 ///|
 /// Knight piece-square table.
-let knight_table : Array[Int] = [
+let knight_table : Array[Int32] = [
   -50, -40, -30, -30, -30, -30, -40, -50, -40, -20, 0, 0, 0, 0, -20, -40, -30, 0,
   10, 15, 15, 10, 0, -30, -30, 5, 15, 20, 20, 15, 5, -30, -30, 0, 15, 20, 20, 15,
   0, -30, -30, 5, 10, 15, 15, 10, 5, -30, -40, -20, 0, 5, 5, 0, -20, -40, -50, -40,
@@ -41,7 +41,7 @@ let knight_table : Array[Int] = [
 
 ///|
 /// Bishop piece-square table.
-let bishop_table : Array[Int] = [
+let bishop_table : Array[Int32] = [
   -20, -10, -10, -10, -10, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5,
   10, 10, 5, 0, -10, -10, 5, 5, 10, 10, 5, 5, -10, -10, 0, 10, 10, 10, 10, 0, -10,
   -10, 10, 10, 10, 10, 10, 10, -10, -10, 5, 0, 0, 0, 0, 5, -10, -20, -10, -10, -10,
@@ -50,7 +50,7 @@ let bishop_table : Array[Int] = [
 
 ///|
 /// Rook piece-square table.
-let rook_table : Array[Int] = [
+let rook_table : Array[Int32] = [
   0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 10, 10, 10, 10, 10, 5, -5, 0, 0, 0, 0, 0, 0, -5,
   -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5,
   0, 0, 0, 0, 0, 0, -5, 0, 0, 5, 5, 0, 0, 0, 0,
@@ -58,7 +58,7 @@ let rook_table : Array[Int] = [
 
 ///|
 /// Queen piece-square table.
-let queen_table : Array[Int] = [
+let queen_table : Array[Int32] = [
   -20, -10, -10, -5, -5, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5, 5,
   5, 5, 0, -10, -5, 0, 5, 5, 5, 5, 0, -5, 0, 0, 5, 5, 5, 5, 0, -5, -10, 5, 5, 5,
   5, 5, 0, -10, -10, 0, 5, 0, 0, 0, 0, -10, -20, -10, -10, -5, -5, -10, -10, -20,
@@ -66,7 +66,7 @@ let queen_table : Array[Int] = [
 
 ///|
 /// King piece-square table (middlegame).
-let king_table : Array[Int] = [
+let king_table : Array[Int32] = [
   -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30,
   -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30,
   -20, -30, -30, -40, -40, -30, -30, -20, -10, -20, -20, -20, -20, -20, -20, -10,
@@ -75,7 +75,7 @@ let king_table : Array[Int] = [
 
 ///|
 /// Piece-square bonus for a piece of `color` on `sq`.
-fn pst(kind : PieceType, color : Color, sq : Square) -> Int {
+fn pst(kind : PieceType, color : Color, sq : Square) -> Int32 {
   let file = file_of(sq)
   let rank = rank_of(sq)
   let index = if color == White {
@@ -95,18 +95,18 @@ fn pst(kind : PieceType, color : Color, sq : Square) -> Int {
 
 ///|
 /// Bonus for having the bishop pair, in centipawns.
-let bishop_pair_bonus : Int = 30
+let bishop_pair_bonus : Int32 = 30
 
 ///|
 /// Penalty per extra pawn on the same file, in centipawns.
-let doubled_pawn_penalty : Int = 15
+let doubled_pawn_penalty : Int32 = 15
 
 ///|
 /// Static evaluation in centipawns, from White's point of view.
-pub fn Chess::evaluate(self : Chess) -> Int {
+pub fn Chess::evaluate(self : Chess) -> Int32 {
   let mut score = 0
-  let white_pawn_files : Array[Int] = Array::make(8, 0)
-  let black_pawn_files : Array[Int] = Array::make(8, 0)
+  let white_pawn_files : Array[Int32] = Array::make(8, 0)
+  let black_pawn_files : Array[Int32] = Array::make(8, 0)
   let mut white_bishops = 0
   let mut black_bishops = 0
   let mut sq = 0
@@ -162,7 +162,7 @@ pub fn Chess::evaluate(self : Chess) -> Int {
 
 ///|
 /// Heuristic ordering score for a move (higher is tried first).
-fn move_score(m : Move) -> Int {
+fn move_score(m : Move) -> Int32 {
   let mut score = 0
   match m.captured {
     Some(k) => score = score + material_value(k) * 10 - material_value(m.piece)
@@ -197,7 +197,7 @@ fn order_moves(moves : Array[Move]) -> Array[Move] {
 
 ///|
 /// Static evaluation from the side-to-move point of view.
-fn Chess::evaluate_relative(self : Chess) -> Int {
+fn Chess::evaluate_relative(self : Chess) -> Int32 {
   let score = self.evaluate()
   if self.turn == White {
     score
@@ -208,7 +208,7 @@ fn Chess::evaluate_relative(self : Chess) -> Int {
 
 ///|
 /// Quiescence search: extend only capture moves to avoid the horizon effect.
-fn Chess::quiesce(self : Chess, alpha : Int, beta : Int) -> Int {
+fn Chess::quiesce(self : Chess, alpha : Int32, beta : Int32) -> Int32 {
   let stand = self.evaluate_relative()
   if stand >= beta {
     return beta
@@ -233,11 +233,11 @@ fn Chess::quiesce(self : Chess, alpha : Int, beta : Int) -> Int {
 /// Negamax with alpha-beta pruning. Returns a score from the side-to-move POV.
 fn Chess::negamax(
   self : Chess,
-  depth : Int,
-  alpha : Int,
-  beta : Int,
-  ply : Int,
-) -> Int {
+  depth : Int32,
+  alpha : Int32,
+  beta : Int32,
+  ply : Int32,
+) -> Int32 {
   let moves = self.legal_moves_raw()
   if moves.length() == 0 {
     if self.is_check() {
@@ -265,7 +265,7 @@ fn Chess::negamax(
 
 ///|
 /// Search to `depth` plies and return the best move, or `None` if the game is over.
-pub fn Chess::best_move(self : Chess, depth : Int) -> Move? {
+pub fn Chess::best_move(self : Chess, depth : Int32) -> Move? {
   let moves = self.moves()
   if moves.length() == 0 {
     return None
@@ -290,7 +290,7 @@ pub fn Chess::best_move(self : Chess, depth : Int) -> Move? {
 
 ///|
 /// Like `best_move`, but also returns the score from the mover's point of view.
-pub fn Chess::best_move_scored(self : Chess, depth : Int) -> (Move?, Int) {
+pub fn Chess::best_move_scored(self : Chess, depth : Int32) -> (Move?, Int32) {
   let moves = self.moves()
   if moves.length() == 0 {
     return (None, 0)
